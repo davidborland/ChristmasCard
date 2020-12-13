@@ -27,11 +27,7 @@
 <div class="container-fluid text-center fullHeight">
   <div class="row fullHeight">
     <div class="col-12 fullHeight">
-      <svg id="card">
-        <clipPath id="circleClip" clipPathUnits="objectBoundingBox">
-          <circle cx=".5" cy=".5" r=".25" />
-        </clipPath>
-      </svg>
+      <svg id="card"></svg>
     </div>
   </div>
 </div>
@@ -66,7 +62,7 @@ function drawImages(images) {
     .join(
       enter => enter.append("image")
           .attr("href", d => d.href)
-          .attr("clip-path", "url(#circleClip)"),
+          .attr("clip-path", "circle(30%)"),
       exit => exit.remove()
     )
       .attr("width", imageWidth * width)
