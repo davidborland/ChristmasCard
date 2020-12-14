@@ -27,48 +27,67 @@
 <div class="container-fluid text-center fullHeight">
   <div class="row fullHeight">
     <div class="col-12 fullHeight">
-      <svg id="card"></svg>
+      <svg id="card">
+        <g></g>
+      </svg>
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
 
-const imageWidth = 0.1;
-const imageHeight = 0.1;
+const imageSize = 200;
+const numImages = 50;
+
+// XXX: Create x and y in pixels, just have enough to handle large screens
 
 d3.json("imageNames.json")
   .then(data => {
-    images = data.map(d => ({
-      href: "images/" + d,
+    images = d3.range(numImages).map((d, i) => ({
+      href: "images/" + data[i % data.length],
       x: Math.random(),
       y: Math.random()
     }));
 
-    drawImages(images);
+    setInterval(() => drawImages(images), 500);
   })
   .catch(error => {
     console.log(error);
   });
 
 function drawImages(images) {
+  const margin = imageSize;
+
   const svg = d3.select("#card");
 
-  const width = parseInt(svg.style("width"), 10);
-  const height = parseInt(svg.style("height"), 10);
+  const width = parseInt(svg.style("width"), 10) - margin * 2;
+  const height = parseInt(svg.style("height"), 10) - margin * 2;
 
-  svg.selectAll("image")
+  const g = svg.select("g")
+      .attr("transform", "translate(" + (margin - imageSize / 2) + "," + (margin - imageSize / 2) + ")");
+
+  const xScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, width]);
+
+  const yScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, height]);
+
+  g.selectAll("image")
     .data(images)
     .join(
       enter => enter.append("image")
           .attr("href", d => d.href)
-          .attr("clip-path", "circle(30%)"),
+          .attr("clip-path", "circle(50%)")
+          .attr("width", imageSize)
+          .attr("height", imageSize)
+          .attr("x", d => xScale(d.x))
+          .attr("y", d => yScale(d.y)),
       exit => exit.remove()
     )
-      .attr("width", imageWidth * width)
-      .attr("height", imageHeight * height)
-      .attr("x", d => d.x * width)
-      .attr("y", d => d.y * height);
+      .attr("x", d => xScale(d.x))
+      .attr("y", d => yScale(d.y));
 }
 
 </script>
