@@ -46,28 +46,38 @@
 
 <script type="text/javascript">
 
-const imageSize = 200;
-const numImages = 10;
+const imageSize = 100;
+const snowflakeSize = imageSize * 1.5;
+const numSnowflakes = 100;
+const vyMin = 0.0005;
+const vyMax = 0.001;
+
+const yOffset = 0.2;
+
+let snowflakes = [];
 
 // XXX: Create x and y in pixels, just have enough to handle large screens
 
-d3.json("imageNames.json")
-  .then(data => {
-    images = d3.range(numImages).map((d, i) => ({
-      href: "images/" + data[i % data.length],
-      x: Math.random(),
-      y: Math.random()
-    }));
+Promise.all([
+  d3.json("imageNames.json"),
+  d3.json("snowflakeNames.json")
+])
+.then(([imageNames, snowflakeNames]) => {
+  snowflakes = d3.range(numSnowflakes).map((d, i) => ({
+    image: "images/" + imageNames[i % imageNames.length],
+    snowflake: "snowflakes/" + snowflakeNames[i % snowflakeNames.length],
+    x: Math.random(),
+    y: -yOffset + Math.random() * (1 + yOffset * 2),
+    vy: vyMin + Math.random() * (vyMax - vyMin)
+  }));
 
-    //setInterval(() => drawImages(images), 500);
+  setInterval(() => drawSnowflakes(), 10);
+})
+.catch(error => {
+  console.log(error);
+});
 
-    drawImages(images);
-  })
-  .catch(error => {
-    console.log(error);
-  });
-
-function drawImages(images) {
+function drawSnowflakes() {
   const margin = imageSize;
 
   const svg = d3.select("#card");
@@ -89,7 +99,7 @@ function drawImages(images) {
   svg.select(".snowflakes")
       .attr("transform", "translate(" + (margin - imageSize / 2) + "," + (margin - imageSize / 2) + ")")
     .selectAll(".snowflake")
-      .data(images)
+      .data(snowflakes)
       .join(
         enter => {
           const g = enter.append("g")
@@ -97,17 +107,30 @@ function drawImages(images) {
             .attr("transform", d => "translate(" + xScale(d.x) + "," + yScale(d.y) + ")");
 
           g.append("image")
-            .attr("href", d => d.href)
+            .attr("href", d => d.snowflake)
+            .attr("width", snowflakeSize)
+            .attr("height", snowflakeSize);
+
+          g.append("image")
+            .attr("href", d => d.image)
+            .attr("x", imageSize / 4)
+            .attr("y", imageSize / 4)
             .attr("width", imageSize)
             .attr("height", imageSize)
             .style("mask", "url(#mask)");
 
           return g;
         },
+        update => update,
         exit => exit.remove()
       )
-      .attr("x", d => xScale(d.x))
-      .attr("y", d => yScale(d.y));
+      .attr("transform", d => {
+        d.y += d.vy;
+
+        if (d.y > 1 + yOffset) d.y = -yOffset;
+
+        return "translate(" + xScale(d.x) + "," + yScale(d.y) + ")";
+      });
 }
 
 </script>
