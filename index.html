@@ -28,7 +28,17 @@
   <div class="row fullHeight">
     <div class="col-12 fullHeight">
       <svg id="card">
-        <g></g>
+        <defs>  
+          <radialGradient id="gradient">  
+            <stop offset="50%" stop-color="white" stop-opacity="1" />  
+            <stop offset="100%" stop-color="white" stop-opacity="0" />  
+          </radialGradient>       
+       
+          <mask id="mask" maskContentUnits="objectBoundingBox">        
+            <circle cx=".5" cy=".5" r=".5" fill="url(#gradient)" />         
+          </mask>  
+         </defs>
+        <g class="snowflakes"></g>
       </svg>
     </div>
   </div>
@@ -37,7 +47,7 @@
 <script type="text/javascript">
 
 const imageSize = 200;
-const numImages = 50;
+const numImages = 10;
 
 // XXX: Create x and y in pixels, just have enough to handle large screens
 
@@ -49,7 +59,9 @@ d3.json("imageNames.json")
       y: Math.random()
     }));
 
-    setInterval(() => drawImages(images), 500);
+    //setInterval(() => drawImages(images), 500);
+
+    drawImages(images);
   })
   .catch(error => {
     console.log(error);
@@ -74,18 +86,26 @@ function drawImages(images) {
       .domain([0, 1])
       .range([0, height]);
 
-  g.selectAll("image")
-    .data(images)
-    .join(
-      enter => enter.append("image")
-          .attr("href", d => d.href)
-          .attr("clip-path", "circle(50%)")
-          .attr("width", imageSize)
-          .attr("height", imageSize)
-          .attr("x", d => xScale(d.x))
-          .attr("y", d => yScale(d.y)),
-      exit => exit.remove()
-    )
+  svg.select(".snowflakes")
+      .attr("transform", "translate(" + (margin - imageSize / 2) + "," + (margin - imageSize / 2) + ")")
+    .selectAll(".snowflake")
+      .data(images)
+      .join(
+        enter => {
+          const g = enter.append("g")
+            .attr("class", "snowflake")
+            .attr("transform", d => "translate(" + xScale(d.x) + "," + yScale(d.y) + ")");
+
+          g.append("image")
+            .attr("href", d => d.href)
+            .attr("width", imageSize)
+            .attr("height", imageSize)
+            .style("mask", "url(#mask)");
+
+          return g;
+        },
+        exit => exit.remove()
+      )
       .attr("x", d => xScale(d.x))
       .attr("y", d => yScale(d.y));
 }
