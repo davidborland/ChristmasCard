@@ -78,7 +78,8 @@ Promise.all([
 });
 
 function drawSnowflakes() {
-  const margin = imageSize;
+  //const margin = imageSize;
+  const margin = -imageSize;
 
   const svg = d3.select("#card");
 
@@ -97,7 +98,7 @@ function drawSnowflakes() {
       .range([0, height]);
 
   svg.select(".snowflakes")
-      .attr("transform", "translate(" + (margin - imageSize / 2) + "," + (margin - imageSize / 2) + ")")
+      .attr("transform", "translate(" + (margin - imageSize / 2) + ",0)")
     .selectAll(".snowflake")
       .data(snowflakes)
       .join(
