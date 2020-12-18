@@ -38,7 +38,7 @@
             <stop offset="100%" stop-color="white" stop-opacity="0" />  
           </radialGradient>       
 
-          <linearGradient id="backgroundGradient" gradientTransform="rotate(90)"">
+          <linearGradient id="backgroundGradient" gradientTransform="rotate(90)">
             <stop offset="0%" stop-color="#060128" />  
             <stop offset="100%" stop-color="#01015B" />
           </linearGradient>
@@ -46,7 +46,7 @@
           <mask id="mask" maskContentUnits="objectBoundingBox">        
             <circle cx=".5" cy=".5" r=".5" fill="url(#gradient)" />         
           </mask>  
-         </defs>
+        </defs>
         <rect class="background"></rect>        
         <image href="images/banner.png" width="100%" />
         <g class="snowflakes"></g>
@@ -103,9 +103,9 @@ function drawSnowflakes() {
       .attr("width", width)
       .attr("height", height);
 
-  const imageSize = Math.sqrt(width) * 2;
+  const imageSize = Math.sqrt(width) * 3;
   const snowflakeSize = imageSize * 1.5;
-  const selectScale = 8;
+  const selectScale = width / imageSize * 0.5;
 
   const xScale = d3.scaleLinear()
       .domain([0, 1])
