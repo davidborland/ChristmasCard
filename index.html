@@ -20,11 +20,8 @@
       height: 100%;
     }
 
-    .background {      
-      width: 100%;
-      height: 100%;
-      visibility: hidden;
-      pointer-events: all;
+    .background {    
+      fill: url(#backgroundGradient);
     }
   </style>
 </head>
@@ -40,6 +37,11 @@
             <stop offset="50%" stop-color="white" stop-opacity="1" />  
             <stop offset="100%" stop-color="white" stop-opacity="0" />  
           </radialGradient>       
+
+          <linearGradient id="backgroundGradient" gradientTransform="rotate(90)"">
+            <stop offset="0%" stop-color="#060128" />  
+            <stop offset="100%" stop-color="#01015B" />
+          </linearGradient>
        
           <mask id="mask" maskContentUnits="objectBoundingBox">        
             <circle cx=".5" cy=".5" r=".5" fill="url(#gradient)" />         
@@ -54,8 +56,6 @@
 
 <script type="text/javascript">
 
-const imageSize = 200;
-const snowflakeSize = imageSize * 1.5;
 const numSnowflakes = 30;
 const vyMin = 0.0005;
 const vyMax = 0.001;
@@ -64,6 +64,7 @@ const yOffset = 0.2;
 
 let snowflakes = [];
 let selected = null;
+let frame = 0;
 
 d3.select("#card").select(".background")
     .on("click", () => selected = null);
@@ -79,6 +80,7 @@ Promise.all([
     snowflake: "snowflakes/" + snowflakeNames[i % snowflakeNames.length],
     x: Math.random(),
     y: -yOffset + Math.random() * (1 + yOffset * 2),
+    phase: Math.random(),
     vy: vyMin + Math.random() * (vyMax - vyMin)
   }));
 
@@ -96,6 +98,14 @@ function drawSnowflakes() {
   const width = parseInt(svg.style("width"), 10);
   const height = parseInt(svg.style("height"), 10);
 
+  svg.select(".background")
+      .attr("width", width)
+      .attr("height", height);
+
+  const imageSize = Math.sqrt(width) * 2;
+  const snowflakeSize = imageSize * 1.5;
+  const selectScale = 10;
+
   const xScale = d3.scaleLinear()
       .domain([0, 1])
       .range([0, width]);
@@ -104,13 +114,12 @@ function drawSnowflakes() {
       .domain([0, 1])
       .range([0, height]);
 
-  svg.select(".snowflakes").selectAll(".snowflake")
+  const snowflake = svg.select(".snowflakes").selectAll(".snowflake")
       .data(snowflakes.sort((a, b) => a === selected ? 1 : b === selected ? -1 : 0), d => d.id)
       .join(
         enter => {
           const g = enter.append("g")
             .attr("class", "snowflake")
-            .attr("transform", d => "translate(" + xScale(d.x) + "," + yScale(d.y) + ")")
             .on("click", function(event, d) {
               if (selected) {
                 selected = null;
@@ -121,19 +130,12 @@ function drawSnowflakes() {
             });
 
           g.append("image")
-            .attr("href", d => d.snowflake)
-            .attr("x", -snowflakeSize / 2)
-            .attr("y", -snowflakeSize / 2)
-            .attr("width", snowflakeSize)
-            .attr("height", snowflakeSize);
+            .attr("class", "flake")
+            .attr("href", d => d.snowflake);
 
           g.append("image")
-            .attr("href", d => d.image)
-            .attr("x", -imageSize / 2)
-            .attr("y", -imageSize / 2)
-            .attr("width", imageSize)
-            .attr("height", imageSize)
-            .style("mask", "url(#mask)");
+            .attr("class", "image")
+            .attr("href", d => d.image);
 
           return g;
         },
@@ -142,9 +144,10 @@ function drawSnowflakes() {
       )
       .attr("transform", d => {
         if (d === selected) {
-          return "translate(" + xScale(0.5) + "," + yScale(0.5) + ")scale(3)";
+          return "translate(" + xScale(0.5) + "," + yScale(0.5) + ")scale(" + selectScale + ")";
         }
         else {
+          d.x += Math.sin(frame / 100 + d.phase) * 0.0005;
           d.y += d.vy;
 
           if (d.y > 1 + yOffset) {
@@ -156,6 +159,21 @@ function drawSnowflakes() {
         }
       })
       .style("opacity", d => !selected || d === selected ? 1.0 : 0.2);
+
+  snowflake.selectAll(".flake")
+      .attr("x", -snowflakeSize / 2)
+      .attr("y", -snowflakeSize / 2)
+      .attr("width", snowflakeSize)
+      .attr("height", snowflakeSize);
+
+  snowflake.selectAll(".image")
+      .attr("x", -imageSize / 2)
+      .attr("y", -imageSize / 2)
+      .attr("width", imageSize)
+      .attr("height", imageSize)
+      .style("mask", d => d === selected ? null : "url(#mask)");
+
+  frame++;
 }
 
 </script>
