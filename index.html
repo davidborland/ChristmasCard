@@ -124,6 +124,7 @@ function drawSnowflakes() {
         enter => {
           const g = enter.append("g")
             .attr("class", "snowflake")
+            .style("cursor", "pointer")
             .on("click", function(event, d) {
               if (selected) {
                 selected = null;
