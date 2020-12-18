@@ -23,6 +23,10 @@
     .background {    
       fill: url(#backgroundGradient);
     }
+
+    .banner {
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -48,7 +52,7 @@
           </mask>  
         </defs>
         <rect class="background"></rect>        
-        <image href="images/banner.png" width="100%" />
+        <image class="banner" href="images/banner.png" width="100%" />
         <g class="snowflakes"></g>
       </svg>
     </div>
@@ -71,7 +75,16 @@ let maximumOverdrive = false;
 let maxImage = "images/Max_small.png";
 
 d3.select("#card").select(".background")
-    .on("click", () => selected = null);
+    .on("click", () => {
+      if (!selected && maximumOverdrive) {                
+        d3.select("#card").selectAll(".snowflake").select(".image")
+            .attr("href", d => d.image);
+
+        maximumOverdrive = false;
+      }
+
+      selected = null;
+    });
 
 Promise.all([
   d3.json("imageNames.json"),
@@ -130,21 +143,21 @@ function drawSnowflakes() {
                 selected = null;
               }
               else {
-                selected = d;
-
-                const isMax = d.image === maxImage;
-
-                if (maximumOverdrive) {
+                if (maximumOverdrive) {                
                   svg.selectAll(".snowflake").select(".image")
                       .attr("href", d => d.image);
 
                   maximumOverdrive = false;
                 }
-                else if (isMax && !maximumOverdrive) {
-                  svg.selectAll(".snowflake").select(".image")
-                      .attr("href", maxImage);
+                else {                  
+                  selected = d;
 
-                  maximumOverdrive = true;
+                  if (d.image === maxImage && !maximumOverdrive) {
+                    svg.selectAll(".snowflake").select(".image")
+                        .attr("href", maxImage);
+
+                    maximumOverdrive = true;
+                  }
                 }
               }
             });
