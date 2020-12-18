@@ -78,6 +78,7 @@ Promise.all([
   snowflakes = d3.range(numSnowflakes).map((d, i) => ({
     id: i,
     image: "images/" + imageNames[i % imageNames.length],
+    //image: "images/Max_small.png",
     snowflake: "snowflakes/" + snowflakeNames[i % snowflakeNames.length],
     x: Math.random(),
     y: -yOffset + Math.random() * (1 + yOffset * 2),
