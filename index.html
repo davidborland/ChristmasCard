@@ -19,6 +19,13 @@
       width: 100%;
       height: 100%;
     }
+
+    .background {      
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+      pointer-events: all;
+    }
   </style>
 </head>
 
@@ -38,6 +45,7 @@
             <circle cx=".5" cy=".5" r=".5" fill="url(#gradient)" />         
           </mask>  
          </defs>
+        <rect class="background"></rect>
         <g class="snowflakes"></g>
       </svg>
     </div>
@@ -46,17 +54,19 @@
 
 <script type="text/javascript">
 
-const imageSize = 100;
+const imageSize = 200;
 const snowflakeSize = imageSize * 1.5;
-const numSnowflakes = 100;
+const numSnowflakes = 30;
 const vyMin = 0.0005;
 const vyMax = 0.001;
 
 const yOffset = 0.2;
 
 let snowflakes = [];
+let selected = null;
 
-// XXX: Create x and y in pixels, just have enough to handle large screens
+d3.select("#card").select(".background")
+    .on("click", () => selected = null);
 
 Promise.all([
   d3.json("imageNames.json"),
@@ -64,6 +74,7 @@ Promise.all([
 ])
 .then(([imageNames, snowflakeNames]) => {
   snowflakes = d3.range(numSnowflakes).map((d, i) => ({
+    id: i,
     image: "images/" + imageNames[i % imageNames.length],
     snowflake: "snowflakes/" + snowflakeNames[i % snowflakeNames.length],
     x: Math.random(),
@@ -78,16 +89,12 @@ Promise.all([
 });
 
 function drawSnowflakes() {
-  //const margin = imageSize;
-  const margin = -imageSize;
+  const margin = 0;
 
   const svg = d3.select("#card");
 
-  const width = parseInt(svg.style("width"), 10) - margin * 2;
-  const height = parseInt(svg.style("height"), 10) - margin * 2;
-
-  const g = svg.select("g")
-      .attr("transform", "translate(" + (margin - imageSize / 2) + "," + (margin - imageSize / 2) + ")");
+  const width = parseInt(svg.style("width"), 10);
+  const height = parseInt(svg.style("height"), 10);
 
   const xScale = d3.scaleLinear()
       .domain([0, 1])
@@ -97,25 +104,33 @@ function drawSnowflakes() {
       .domain([0, 1])
       .range([0, height]);
 
-  svg.select(".snowflakes")
-      .attr("transform", "translate(" + (margin - imageSize / 2) + ",0)")
-    .selectAll(".snowflake")
-      .data(snowflakes)
+  svg.select(".snowflakes").selectAll(".snowflake")
+      .data(snowflakes.sort((a, b) => a === selected ? 1 : b === selected ? -1 : 0), d => d.id)
       .join(
         enter => {
           const g = enter.append("g")
             .attr("class", "snowflake")
-            .attr("transform", d => "translate(" + xScale(d.x) + "," + yScale(d.y) + ")");
+            .attr("transform", d => "translate(" + xScale(d.x) + "," + yScale(d.y) + ")")
+            .on("click", function(event, d) {
+              if (selected) {
+                selected = null;
+              }
+              else {
+                selected = d;
+              }
+            });
 
           g.append("image")
             .attr("href", d => d.snowflake)
+            .attr("x", -snowflakeSize / 2)
+            .attr("y", -snowflakeSize / 2)
             .attr("width", snowflakeSize)
             .attr("height", snowflakeSize);
 
           g.append("image")
             .attr("href", d => d.image)
-            .attr("x", imageSize / 4)
-            .attr("y", imageSize / 4)
+            .attr("x", -imageSize / 2)
+            .attr("y", -imageSize / 2)
             .attr("width", imageSize)
             .attr("height", imageSize)
             .style("mask", "url(#mask)");
@@ -126,12 +141,21 @@ function drawSnowflakes() {
         exit => exit.remove()
       )
       .attr("transform", d => {
-        d.y += d.vy;
+        if (d === selected) {
+          return "translate(" + xScale(0.5) + "," + yScale(0.5) + ")scale(3)";
+        }
+        else {
+          d.y += d.vy;
 
-        if (d.y > 1 + yOffset) d.y = -yOffset;
+          if (d.y > 1 + yOffset) {
+            d.x = Math.random();
+            d.y = -yOffset;
+          }
 
-        return "translate(" + xScale(d.x) + "," + yScale(d.y) + ")";
-      });
+          return "translate(" + xScale(d.x) + "," + yScale(d.y) + ")";
+        }
+      })
+      .style("opacity", d => !selected || d === selected ? 1.0 : 0.2);
 }
 
 </script>
