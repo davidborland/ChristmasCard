@@ -67,6 +67,9 @@ let snowflakes = [];
 let selected = null;
 let frame = 0;
 
+let maximumOverdrive = false;
+let maxImage = "images/Max_small.png";
+
 d3.select("#card").select(".background")
     .on("click", () => selected = null);
 
@@ -78,7 +81,6 @@ Promise.all([
   snowflakes = d3.range(numSnowflakes).map((d, i) => ({
     id: i,
     image: "images/" + imageNames[i % imageNames.length],
-    //image: "images/Max_small.png",
     snowflake: "snowflakes/" + snowflakeNames[i % snowflakeNames.length],
     x: Math.random(),
     y: -yOffset + Math.random() * (1 + yOffset * 2),
@@ -128,6 +130,21 @@ function drawSnowflakes() {
               }
               else {
                 selected = d;
+
+                const isMax = d.image === maxImage;
+
+                if (maximumOverdrive) {
+                  svg.selectAll(".snowflake").select(".image")
+                      .attr("href", d => d.image);
+
+                  maximumOverdrive = false;
+                }
+                else if (isMax && !maximumOverdrive) {
+                  svg.selectAll(".snowflake").select(".image")
+                      .attr("href", maxImage);
+
+                  maximumOverdrive = true;
+                }
               }
             });
 
