@@ -24,7 +24,7 @@
       fill: url(#backgroundGradient);
     }
 
-    .banner {
+    .banner, .bannerMax {
       pointer-events: none;
     }
   </style>
@@ -53,6 +53,7 @@
         </defs>
         <rect class="background"></rect>        
         <image class="banner" href="images/banner.png" width="100%" />
+        <image class="bannerMax" href="images/banner_max.png" width="100%" style="visibility: hidden;" />
         <g class="snowflakes"></g>
       </svg>
     </div>
@@ -74,13 +75,40 @@ let frame = 0;
 let maximumOverdrive = false;
 let maxImage = "images/Max_small.png";
 
+const maxifyOn = () => {
+  const svg = d3.select("#card");
+
+  svg.selectAll(".snowflake").select(".image")
+      .attr("href", maxImage);
+
+  svg.select(".banner")
+      .style("visibility", "hidden");
+
+  svg.select(".bannerMax")
+      .style("visibility", "visible");
+
+  maximumOverdrive = true;
+};
+
+const maxifyOff = () => {
+  const svg = d3.select("#card");
+
+  svg.selectAll(".snowflake").select(".image")
+      .attr("href",  d => d.image);
+
+  svg.select(".banner")
+      .style("visibility", "visible");
+
+  svg.select(".bannerMax")
+      .style("visibility", "hidden");
+
+  maximumOverdrive = false;
+};
+
 d3.select("#card").select(".background")
     .on("click", () => {
       if (!selected && maximumOverdrive) {                
-        d3.select("#card").selectAll(".snowflake").select(".image")
-            .attr("href", d => d.image);
-
-        maximumOverdrive = false;
+        maxifyOff();
       }
 
       selected = null;
@@ -144,19 +172,13 @@ function drawSnowflakes() {
               }
               else {
                 if (maximumOverdrive) {                
-                  svg.selectAll(".snowflake").select(".image")
-                      .attr("href", d => d.image);
-
-                  maximumOverdrive = false;
+                  maxifyOff();
                 }
                 else {                  
                   selected = d;
 
                   if (d.image === maxImage && !maximumOverdrive) {
-                    svg.selectAll(".snowflake").select(".image")
-                        .attr("href", maxImage);
-
-                    maximumOverdrive = true;
+                    maxifyOn();
                   }
                 }
               }
