@@ -38,6 +38,19 @@
       bottom: 20px;
       right: 20px;
     }
+
+    .banner.congratulations {
+      pointer-events: all;
+      left: 0;
+      right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      bottom: 40%;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
   </style>
 </head>
 
@@ -69,6 +82,7 @@
   </svg>
   <img class='banner main' src='images/banner.png' />
   <img class='banner year' src='images/banner_year.png' />
+  <img class='banner congratulations hidden' src='images/banner_congratulations.png' />
 </div>
 
 <script type='text/javascript'>
@@ -78,7 +92,7 @@ d3.select('body').on('click', () => {
   if (!playingAudio) d3.select('audio').node().play();
 });
 
-const numPokeballs = 20;
+const numPokeballs = 10;
 const vScale = d3.scaleLinear()
   .domain([0, 1])
   .range([0.001, 0.004]);
@@ -86,6 +100,7 @@ const vScale = d3.scaleLinear()
 let pokeballs = [];
 let selected = null;
 let frame = 0;
+let caughtEmAll = false;
 
 const openBall = 'pokeballs/open.png';
 const closedBall = 'pokeballs/closed.png';
@@ -99,6 +114,9 @@ d3.json('imageNames.json').then(imageNames => {
   pokeballs = d3.range(numPokeballs).map((d, i) => ({
     id: i,
     image: 'images/' + imageNames[i % imageNames.length],
+    imageLoaded: false,
+    ballLoaded: false,
+    clicked: false,
     x: Math.random(),
     y: 0.1,
     vx: vScale(Math.random()) * (Math.random() * 2 - 1),
@@ -143,6 +161,12 @@ function drawPokeballs() {
           .attr('class', 'pokeball')
           .style('cursor', 'pointer')
           .on('click', function(event, d) {
+            if (d === selected) {
+              d.clicked = true;
+
+              caughtEmAll = pokeballs.reduce((all, pokeball) => all && pokeball.clicked, true);              
+            }
+
             selected = selected ? null : d;
 
             d.ballLoaded = false;
@@ -192,7 +216,7 @@ function drawPokeballs() {
       }
     })
     .style('opacity', d => !selected || d === selected ? 1.0 : 0.2)
-    .style('visibility', d => d.imageLoaded && d.ballLoaded ? 'visible' : 'hidden')
+    .style('visibility', d => d.imageLoaded && d.ballLoaded && !d.clicked ? 'visible' : 'hidden')
     .select('.ball')
     .attr('href', d => d === selected ? openBall : closedBall);
 
@@ -208,6 +232,26 @@ function drawPokeballs() {
     .attr('width', imageSize)
     .attr('height', imageSize)
     .style('mask', d => d === selected ? null : 'url(#mask)');
+
+  d3.select('.congratulations')
+    .classed('hidden', !caughtEmAll)
+    .on('click', () => {
+      const speedScale = 2;
+
+      pokeballs.forEach(d => {        
+        d.clicked = false;
+
+        d.vx *= speedScale;
+        d.vy *= speedScale;
+      });      
+
+      const v = [...vScale.range()];
+      v[0] *= speedScale;
+      v[1] *= speedScale;
+      vScale.range(v);
+
+      caughtEmAll = false;
+    });
 
   frame++;
 }
