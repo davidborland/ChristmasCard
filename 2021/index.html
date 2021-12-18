@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+  <title>Happy Holidays!</title>
+  <script src='https://d3js.org/d3.v7.min.js'></script>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    .fullHeight {
+      height: 100%;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .background {    
+      fill: url(#backgroundGradient);
+    }
+
+    .banner {      
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .banner.main {
+      top: 20px;
+      left: 20px;
+    }
+
+    .banner.year {
+      bottom: 20px;
+      right: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class='fullHeight'>
+      <svg id='card'>
+        <defs>  
+          <radialGradient id='gradient'>  
+            <stop offset='0%' stop-color='white' stop-opacity='1' />  
+            <stop offset='40%' stop-color='white' stop-opacity='0' />  
+          </radialGradient>       
+
+          <linearGradient id='backgroundGradient' gradientTransform='rotate(90)'>
+            <stop offset='0%' stop-color='#060128' />  
+            <stop offset='100%' stop-color='#01015B' />
+          </linearGradient>
+       
+          <mask id='mask' maskContentUnits='objectBoundingBox'>        
+            <circle cx='.5' cy='.5' r='.5' fill='url(#gradient)' />         
+          </mask>  
+        </defs>
+        <rect class='background'></rect>        
+        <g class='pokeballs'></g>
+      </svg>
+      <img class='banner main' src='images/banner.png' />
+      <img class='banner year' src='images/banner_year.png' />
+</div>
+
+<script type='text/javascript'>
+
+const numPokeballs = 20;
+const vyMin = 0.0005;
+const vyMax = 0.001;
+
+const yOffset = 0.2;
+
+let pokeballs = [];
+let selected = null;
+let frame = 0;
+
+const openBall = 'pokeballs/open.png';
+const closedBall = 'pokeballs/closed.png';
+
+d3.select('#card').select('.background')
+  .on('click', () => {
+    selected = null;
+  });
+
+d3.json('imageNames.json').then(imageNames => {
+  pokeballs = d3.range(numPokeballs).map((d, i) => ({
+    id: i,
+    image: 'images/' + imageNames[i % imageNames.length],
+    x: Math.random(),
+    y: -yOffset + Math.random() * (1 + yOffset * 2),
+    phase: Math.random(),
+    vy: vyMin + Math.random() * (vyMax - vyMin)
+  }));
+
+  setInterval(() => drawPokeballs(), 10);
+})
+.catch(error => {
+  console.log(error);
+});
+
+function drawPokeballs() {
+  const margin = 0;
+
+  const svg = d3.select('#card');
+
+  const width = parseInt(svg.style('width'), 10);
+  const height = parseInt(svg.style('height'), 10);
+
+  svg.select('.background')
+      .attr('width', width)
+      .attr('height', height);
+
+  const imageSize = Math.sqrt(width) * 3;
+  const pokeballSize = imageSize * 1.5;
+  const selectScale = width / imageSize * 0.5;
+
+  const xScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, width]);
+
+  const yScale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, height]);
+
+  const pokeball = svg.select('.pokeballs').selectAll('.pokeball')
+    .data(pokeballs.sort((a, b) => a === selected ? 1 : b === selected ? -1 : 0), d => d.id)
+    .join(
+      enter => {
+        const g = enter.append('g')
+          .attr('class', 'pokeball')
+          .style('cursor', 'pointer')
+          .on('click', function(event, d) {
+            selected = selected ? null : d;
+
+            const pokeball = d3.select(this)
+              .attr('transform', 'translate(' + xScale(0.4) + ',' + yScale(0.5) + ')scale(' + selectScale + ')');
+
+            pokeball.select('.ball')
+              .attr('href', openBall);
+
+            pokeball.select('.image')
+              .attr('x', imageSize / 4)
+              .style('mask', null);
+          });
+
+        g.append('image')
+          .attr('class', 'ball');
+
+        g.append('image')
+          .attr('class', 'image')
+          .attr('href', d => d.image);
+
+        return g;
+      }
+    )
+    .attr('transform', d => {
+      if (d === selected) {
+        return 'translate(' + xScale(0.4) + ',' + yScale(0.5) + ')scale(' + selectScale + ')';
+      }
+      else {
+        d.x += Math.sin(frame / 100 + d.phase) * 0.0005;
+        d.y += d.vy;
+
+        if (d.y > 1 + yOffset) {
+          d.x = Math.random();
+          d.y = -yOffset;
+        }
+
+        return 'translate(' + xScale(d.x) + ',' + yScale(d.y) + ')';
+      }
+    })
+    .style('opacity', d => !selected || d === selected ? 1.0 : 0.2)
+    .select('.ball')
+    .attr('href', d => d === selected ? openBall : closedBall);
+
+  svg.selectAll('.ball')
+    .attr('x', -pokeballSize / 2)
+    .attr('y', -pokeballSize / 2)
+    .attr('width', pokeballSize)
+    .attr('height', pokeballSize);
+
+  svg.selectAll('.image')
+    .attr('x', d => d === selected ? pokeballSize * 0.05 : -imageSize * 0.5 + pokeballSize * 0.18)
+    .attr('y', d => d === selected ? -imageSize / 2 + pokeballSize * 0.04 : -imageSize / 2)
+    .attr('width', imageSize)
+    .attr('height', imageSize)
+    .style('mask', d => d === selected ? null : 'url(#mask)');
+
+  frame++;
+}
+
+</script>
+
+</body>
+</html>
