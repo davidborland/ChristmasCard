@@ -48,7 +48,7 @@
       bottom: 40%;
     }
 
-    .hidden {
+    .banner.congratulations.hidden {
       visibility: hidden;
     }
   </style>
@@ -95,7 +95,7 @@ d3.select('body').on('click', () => {
 const numPokeballs = 10;
 const vScale = d3.scaleLinear()
   .domain([0, 1])
-  .range([0.001, 0.004]);
+  .range([0.0005, 0.001]);
 
 let pokeballs = [];
 let selected = null;
@@ -118,7 +118,7 @@ d3.json('imageNames.json').then(imageNames => {
     ballLoaded: false,
     clicked: false,
     x: Math.random(),
-    y: 0.1,
+    y: Math.random(),
     vx: vScale(Math.random()) * (Math.random() * 2 - 1),
     vy: vScale(Math.random())
   }));
