@@ -43,37 +43,45 @@
 
 <body>
 
-<div class='fullHeight'>
-      <svg id='card'>
-        <defs>  
-          <radialGradient id='gradient'>  
-            <stop offset='0%' stop-color='white' stop-opacity='1' />  
-            <stop offset='40%' stop-color='white' stop-opacity='0' />  
-          </radialGradient>       
+<audio loop>
+  <source src='audio/Pokemon Christmas Bash.mp3' type='audio/mpeg' />
+</audio>
 
-          <linearGradient id='backgroundGradient' gradientTransform='rotate(90)'>
-            <stop offset='0%' stop-color='#060128' />  
-            <stop offset='100%' stop-color='#01015B' />
-          </linearGradient>
-       
-          <mask id='mask' maskContentUnits='objectBoundingBox'>        
-            <circle cx='.5' cy='.5' r='.5' fill='url(#gradient)' />         
-          </mask>  
-        </defs>
-        <rect class='background'></rect>        
-        <g class='pokeballs'></g>
-      </svg>
-      <img class='banner main' src='images/banner.png' />
-      <img class='banner year' src='images/banner_year.png' />
+<div class='fullHeight'>
+  <svg id='card'>
+    <defs>  
+      <radialGradient id='gradient'>  
+        <stop offset='0%' stop-color='white' stop-opacity='1' />  
+        <stop offset='40%' stop-color='white' stop-opacity='0' />  
+      </radialGradient>       
+
+      <linearGradient id='backgroundGradient' gradientTransform='rotate(90)'>
+        <stop offset='0%' stop-color='#000' />  
+        <stop offset='100%' stop-color='#000080' />
+      </linearGradient>
+    
+      <mask id='mask' maskContentUnits='objectBoundingBox'>        
+        <circle cx='.5' cy='.5' r='.5' fill='url(#gradient)' />         
+      </mask>  
+    </defs>
+    <rect class='background'></rect>        
+    <g class='pokeballs'></g>
+  </svg>
+  <img class='banner main' src='images/banner.png' />
+  <img class='banner year' src='images/banner_year.png' />
 </div>
 
 <script type='text/javascript'>
 
-const numPokeballs = 20;
-const vyMin = 0.0005;
-const vyMax = 0.001;
+let playingAudio = false;
+d3.select('body').on('click', () => {
+  if (!playingAudio) d3.select('audio').node().play();
+});
 
-const yOffset = 0.2;
+const numPokeballs = 20;
+const vScale = d3.scaleLinear()
+  .domain([0, 1])
+  .range([0.001, 0.004]);
 
 let pokeballs = [];
 let selected = null;
@@ -92,9 +100,9 @@ d3.json('imageNames.json').then(imageNames => {
     id: i,
     image: 'images/' + imageNames[i % imageNames.length],
     x: Math.random(),
-    y: -yOffset + Math.random() * (1 + yOffset * 2),
-    phase: Math.random(),
-    vy: vyMin + Math.random() * (vyMax - vyMin)
+    y: 0.1,
+    vx: vScale(Math.random()) * (Math.random() * 2 - 1),
+    vy: vScale(Math.random())
   }));
 
   setInterval(() => drawPokeballs(), 10);
@@ -137,22 +145,18 @@ function drawPokeballs() {
           .on('click', function(event, d) {
             selected = selected ? null : d;
 
-            const pokeball = d3.select(this)
-              .attr('transform', 'translate(' + xScale(0.4) + ',' + yScale(0.5) + ')scale(' + selectScale + ')');
+            d.ballLoaded = false;
 
-            pokeball.select('.ball')
-              .attr('href', openBall);
-
-            pokeball.select('.image')
-              .attr('x', imageSize / 4)
-              .style('mask', null);
+            d3.select(this).style('visibility', 'hidden');
           });
 
         g.append('image')
-          .attr('class', 'ball');
+          .attr('class', 'ball')
+          .on('load', (evt, d) => d.ballLoaded = true);
 
         g.append('image')
           .attr('class', 'image')
+          .on('load', (evt, d) => d.imageLoaded = true)
           .attr('href', d => d.image);
 
         return g;
@@ -163,18 +167,32 @@ function drawPokeballs() {
         return 'translate(' + xScale(0.4) + ',' + yScale(0.5) + ')scale(' + selectScale + ')';
       }
       else {
-        d.x += Math.sin(frame / 100 + d.phase) * 0.0005;
+        d.x += d.vx;
         d.y += d.vy;
 
-        if (d.y > 1 + yOffset) {
-          d.x = Math.random();
-          d.y = -yOffset;
+        if (d.x > 1) {
+          d.x = 1;
+          d.vx = -vScale(Math.random());
         }
-
+        else if (d.x < 0) {
+          d.x = 0;
+          d.vx = vScale(Math.random());
+        }
+        
+        if (d.y > 1) {
+          d.y = 1;
+          d.vy = -vScale(Math.random());
+        }
+        else if (d.y < 0) {
+          d.y = 0;
+          d.vy = vScale(Math.random());
+        }
+        
         return 'translate(' + xScale(d.x) + ',' + yScale(d.y) + ')';
       }
     })
     .style('opacity', d => !selected || d === selected ? 1.0 : 0.2)
+    .style('visibility', d => d.imageLoaded && d.ballLoaded ? 'visible' : 'hidden')
     .select('.ball')
     .attr('href', d => d === selected ? openBall : closedBall);
 
