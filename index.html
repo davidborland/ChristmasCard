@@ -39,17 +39,35 @@
       right: 20px;
     }
 
-    .banner.congratulations {
-      pointer-events: all;
+    .caughtEmAll {
+      position: absolute;
+      top: 0;
       left: 0;
-      right: 0;
-      margin-left: auto;
-      margin-right: auto;
-      bottom: 40%;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    .banner.congratulations.hidden {
+    .caughtEmAll.hidden {
       visibility: hidden;
+    }
+
+    .caughtEmAll .image {
+      flex: 0 1 auto;
+      width: 60%;
+      margin-top: 20%;
+    }
+
+    .caughtEmAll .video {  
+      flex: 0 1 auto;
+      width: 25%;
+      margin-top: -8%;
+      transform: rotate(-90deg);
     }
   </style>
 </head>
@@ -80,9 +98,14 @@
     <rect class='background'></rect>        
     <g class='pokeballs'></g>
   </svg>
-  <img class='banner main' src='images/banner.png' />
+  <img class='banner main' src='images/banner.png' />  
   <img class='banner year' src='images/banner_year.png' />
-  <img class='banner congratulations hidden' src='images/banner_congratulations.png' />
+  <div class='caughtEmAll hidden'>
+    <img src='images/banner_congratulations.png' class='image' />
+    <video preload loop class='video'>
+      <source src='video/PXL_20211015_224834912.mp4' type='video/mp4' />
+    </video>
+  </div>
 </div>
 
 <script type='text/javascript'>
@@ -92,7 +115,6 @@ d3.select('body').on('click', () => {
   if (!playingAudio) d3.select('audio').node().play();
 });
 
-const numPokeballs = 10;
 const vScale = d3.scaleLinear()
   .domain([0, 1])
   .range([0.0005, 0.001]);
@@ -106,14 +128,14 @@ const openBall = 'pokeballs/open.png';
 const closedBall = 'pokeballs/closed.png';
 
 d3.select('#card').select('.background')
-  .on('click', () => {
+  .on('mousedown', () => {
     selected = null;
   });
 
 d3.json('imageNames.json').then(imageNames => {
-  pokeballs = d3.range(numPokeballs).map((d, i) => ({
+  pokeballs = imageNames.map((name, i) => ({
     id: i,
-    image: 'images/' + imageNames[i % imageNames.length],
+    image: 'images/' + name,
     imageLoaded: false,
     ballLoaded: false,
     clicked: false,
@@ -160,11 +182,15 @@ function drawPokeballs() {
         const g = enter.append('g')
           .attr('class', 'pokeball')
           .style('cursor', 'pointer')
-          .on('click', function(event, d) {
+          .on('mousedown', function(event, d) {
             if (d === selected) {
               d.clicked = true;
 
-              caughtEmAll = pokeballs.reduce((all, pokeball) => all && pokeball.clicked, true);              
+              caughtEmAll = pokeballs.reduce((all, pokeball) => all && pokeball.clicked, true);
+              
+              if (caughtEmAll) {
+                d3.select('video').node().play();
+              }
             }
 
             selected = selected ? null : d;
@@ -186,6 +212,8 @@ function drawPokeballs() {
         return g;
       }
     )
+    .style('visibility', d => d.imageLoaded && d.ballLoaded && !d.clicked ? 'visible' : 'hidden')
+    .style('opacity', d => !selected || d === selected ? 1.0 : 0.2)
     .attr('transform', d => {
       if (d === selected) {
         return 'translate(' + xScale(0.4) + ',' + yScale(0.5) + ')scale(' + selectScale + ')';
@@ -215,8 +243,6 @@ function drawPokeballs() {
         return 'translate(' + xScale(d.x) + ',' + yScale(d.y) + ')';
       }
     })
-    .style('opacity', d => !selected || d === selected ? 1.0 : 0.2)
-    .style('visibility', d => d.imageLoaded && d.ballLoaded && !d.clicked ? 'visible' : 'hidden')
     .select('.ball')
     .attr('href', d => d === selected ? openBall : closedBall);
 
@@ -233,9 +259,9 @@ function drawPokeballs() {
     .attr('height', imageSize)
     .style('mask', d => d === selected ? null : 'url(#mask)');
 
-  d3.select('.congratulations')
+  d3.select('.caughtEmAll')
     .classed('hidden', !caughtEmAll)
-    .on('click', () => {
+    .on('mousedown', () => {
       const speedScale = 2;
 
       pokeballs.forEach(d => {        
@@ -251,6 +277,10 @@ function drawPokeballs() {
       vScale.range(v);
 
       caughtEmAll = false;
+
+      const video = d3.select('video').node();
+      video.pause();
+      video.currentTime = 0;
     });
 
   frame++;
