@@ -1,292 +1,49 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-  <title>Happy Holidays!</title>
-  <script src='https://d3js.org/d3.v7.min.js'></script>
+	<head>
+		<meta charset="utf-8">
+		<title>Happy Holidays</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-
-    .fullHeight {
-      height: 100%;
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .background {    
-      fill: url(#backgroundGradient);
-    }
-
-    .banner {      
-      pointer-events: none;
-      position: absolute;
-    }
-
-    .banner.main {
-      top: 20px;
-      left: 20px;
-    }
-
-    .banner.year {
-      bottom: 20px;
-      right: 20px;
-    }
-
-    .caughtEmAll {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .caughtEmAll.hidden {
-      visibility: hidden;
-    }
-
-    .caughtEmAll .image {
-      flex: 0 1 auto;
-      width: 60%;
-      margin-top: 20%;
-    }
-
-    .caughtEmAll .video {  
-      flex: 0 1 auto;
-      width: 25%;
-      margin-top: -8%;
-      transform: rotate(-90deg);
-    }
-  </style>
-</head>
-
-<body>
-
-<audio loop>
-  <source src='audio/Pokemon Christmas Bash.mp3' type='audio/mpeg' />
-</audio>
-
-<div class='fullHeight'>
-  <svg id='card'>
-    <defs>  
-      <radialGradient id='gradient'>  
-        <stop offset='0%' stop-color='white' stop-opacity='1' />  
-        <stop offset='40%' stop-color='white' stop-opacity='0' />  
-      </radialGradient>       
-
-      <linearGradient id='backgroundGradient' gradientTransform='rotate(90)'>
-        <stop offset='0%' stop-color='#000' />  
-        <stop offset='100%' stop-color='#000080' />
-      </linearGradient>
-    
-      <mask id='mask' maskContentUnits='objectBoundingBox'>        
-        <circle cx='.5' cy='.5' r='.5' fill='url(#gradient)' />         
-      </mask>  
-    </defs>
-    <rect class='background'></rect>        
-    <g class='pokeballs'></g>
-  </svg>
-  <img class='banner main' src='images/banner.png' />  
-  <img class='banner year' src='images/banner_year.png' />
-  <div class='caughtEmAll hidden'>
-    <img src='images/banner_congratulations.png' class='image' />
-    <video preload loop class='video'>
-      <source src='video/PXL_20211015_224834912.mp4' type='video/mp4' />
-    </video>
-  </div>
-</div>
-
-<script type='text/javascript'>
-
-let playingAudio = false;
-d3.select('body').on('click', () => {
-  if (!playingAudio) d3.select('audio').node().play();
-});
-
-const vScale = d3.scaleLinear()
-  .domain([0, 1])
-  .range([0.0005, 0.001]);
-
-let pokeballs = [];
-let selected = null;
-let frame = 0;
-let caughtEmAll = false;
-
-const openBall = 'pokeballs/open.png';
-const closedBall = 'pokeballs/closed.png';
-
-d3.select('#card').select('.background')
-  .on('mousedown', () => {
-    selected = null;
-  });
-
-d3.json('imageNames.json').then(imageNames => {
-  pokeballs = imageNames.map((name, i) => ({
-    id: i,
-    image: 'images/' + name,
-    imageLoaded: false,
-    ballLoaded: false,
-    clicked: false,
-    x: Math.random(),
-    y: Math.random(),
-    vx: vScale(Math.random()) * (Math.random() * 2 - 1),
-    vy: vScale(Math.random())
-  }));
-
-  setInterval(() => drawPokeballs(), 10);
-})
-.catch(error => {
-  console.log(error);
-});
-
-function drawPokeballs() {
-  const margin = 0;
-
-  const svg = d3.select('#card');
-
-  const width = parseInt(svg.style('width'), 10);
-  const height = parseInt(svg.style('height'), 10);
-
-  svg.select('.background')
-      .attr('width', width)
-      .attr('height', height);
-
-  const imageSize = Math.sqrt(width) * 3;
-  const pokeballSize = imageSize * 1.5;
-  const selectScale = width / imageSize * 0.5;
-
-  const xScale = d3.scaleLinear()
-      .domain([0, 1])
-      .range([0, width]);
-
-  const yScale = d3.scaleLinear()
-      .domain([0, 1])
-      .range([0, height]);
-
-  const pokeball = svg.select('.pokeballs').selectAll('.pokeball')
-    .data(pokeballs.sort((a, b) => a === selected ? 1 : b === selected ? -1 : 0), d => d.id)
-    .join(
-      enter => {
-        const g = enter.append('g')
-          .attr('class', 'pokeball')
-          .style('cursor', 'pointer')
-          .on('mousedown', function(event, d) {
-            if (d === selected) {
-              d.clicked = true;
-
-              caughtEmAll = pokeballs.reduce((all, pokeball) => all && pokeball.clicked, true);
-              
-              if (caughtEmAll) {
-                d3.select('video').node().play();
-              }
-            }
-
-            selected = selected ? null : d;
-
-            d.ballLoaded = false;
-
-            d3.select(this).style('visibility', 'hidden');
-          });
-
-        g.append('image')
-          .attr('class', 'ball')
-          .on('load', (evt, d) => d.ballLoaded = true);
-
-        g.append('image')
-          .attr('class', 'image')
-          .on('load', (evt, d) => d.imageLoaded = true)
-          .attr('href', d => d.image);
-
-        return g;
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.147.0/build/three.module.js"
+        }
       }
-    )
-    .style('visibility', d => d.imageLoaded && d.ballLoaded && !d.clicked ? 'visible' : 'hidden')
-    .style('opacity', d => !selected || d === selected ? 1.0 : 0.2)
-    .attr('transform', d => {
-      if (d === selected) {
-        return 'translate(' + xScale(0.4) + ',' + yScale(0.5) + ')scale(' + selectScale + ')';
+    </script>
+
+		<script type="module">
+      import * as THREE from 'three';
+
+			const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+      const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+      const cube = new THREE.Mesh( geometry, material );
+      scene.add( cube );
+
+      camera.position.z = 5;
+
+      function animate() {
+        requestAnimationFrame( animate );
+
+				cube.rotation.x += 0.01;
+				cube.rotation.y += 0.01;
+
+        renderer.render( scene, camera );
       }
-      else {
-        d.x += d.vx;
-        d.y += d.vy;
-
-        if (d.x > 1) {
-          d.x = 1;
-          d.vx = -vScale(Math.random());
-        }
-        else if (d.x < 0) {
-          d.x = 0;
-          d.vx = vScale(Math.random());
-        }
-        
-        if (d.y > 1) {
-          d.y = 1;
-          d.vy = -vScale(Math.random());
-        }
-        else if (d.y < 0) {
-          d.y = 0;
-          d.vy = vScale(Math.random());
-        }
-        
-        return 'translate(' + xScale(d.x) + ',' + yScale(d.y) + ')';
-      }
-    })
-    .select('.ball')
-    .attr('href', d => d === selected ? openBall : closedBall);
-
-  svg.selectAll('.ball')
-    .attr('x', -pokeballSize / 2)
-    .attr('y', -pokeballSize / 2)
-    .attr('width', pokeballSize)
-    .attr('height', pokeballSize);
-
-  svg.selectAll('.image')
-    .attr('x', d => d === selected ? pokeballSize * 0.05 : -imageSize * 0.5 + pokeballSize * 0.18)
-    .attr('y', d => d === selected ? -imageSize / 2 + pokeballSize * 0.04 : -imageSize / 2)
-    .attr('width', imageSize)
-    .attr('height', imageSize)
-    .style('mask', d => d === selected ? null : 'url(#mask)');
-
-  d3.select('.caughtEmAll')
-    .classed('hidden', !caughtEmAll)
-    .on('mousedown', () => {
-      const speedScale = 2;
-
-      pokeballs.forEach(d => {        
-        d.clicked = false;
-
-        d.vx *= speedScale;
-        d.vy *= speedScale;
-      });      
-
-      const v = [...vScale.range()];
-      v[0] *= speedScale;
-      v[1] *= speedScale;
-      vScale.range(v);
-
-      caughtEmAll = false;
-
-      const video = d3.select('video').node();
-      video.pause();
-      video.currentTime = 0;
-    });
-
-  frame++;
-}
-
-</script>
-
-</body>
+      animate();
+		</script>
+	</body>
 </html>
