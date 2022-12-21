@@ -29,8 +29,6 @@
       renderer.setClearColor(0x00003f );
       document.body.appendChild(renderer.domElement);
 
-      //const 
-
       const loader = new THREE.TextureLoader();
 
       const createHouse = async (image, map) => {
@@ -47,7 +45,7 @@
         const aspectRatio = w / h;
 
         //const geometry = new THREE.PlaneGeometry(aspectRatio, 1);
-        const geometry = new THREE.CylinderGeometry(0.5, .5, 0.9, 32, 1, true);
+        const geometry = new THREE.CylinderGeometry(0.5, .5, 1 / aspectRatio * 2, 32, 1, true);
         const mesh = new THREE.Mesh(geometry, material);
 
         // Create 2D canvas for click map
@@ -73,6 +71,19 @@
         };
       };
 
+      const createBall = () => {
+        // Add image to mesh
+        const material = new THREE.MeshBasicMaterial({ 
+          opacity: 0.2,
+          transparent: true
+        });
+
+        const geometry = new THREE.SphereGeometry(0.8, 32, 32);
+        const mesh = new THREE.Mesh(geometry, material);
+        
+        return mesh;
+      };
+
       const ewenHouse = await createHouse('ewen_house.jpg', 'ewen_house_map.jpg');
       const fionaHouse = await createHouse('fiona_house.jpg', 'fiona_house_map.jpg');
       const combinedHouse = await createHouse('combined_house.png', 'combined_house_map.jpg');
@@ -85,6 +96,8 @@
       houses.forEach(house => {
         scene.add(house.mesh);
       });
+
+      scene.add(createBall());
 
       camera.position.z = 2;
 
