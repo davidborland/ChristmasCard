@@ -22,31 +22,115 @@
       import * as THREE from 'three';
 
 			const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
       const renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x00003f );
       document.body.appendChild(renderer.domElement);
 
+      //const 
+
       const loader = new THREE.TextureLoader();
-      const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      const material = new THREE.MeshBasicMaterial({ 
-        map: loader.load('images/ewen_house.jpg')
+
+      const createHouse = async (image, map) => {
+        // Add image to mesh
+        const texture = await loader.loadAsync(`images/${ image }`);
+        const material = new THREE.MeshBasicMaterial({ 
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+
+        const w = texture.image.width;
+        const h = texture.image.height;
+        const aspectRatio = w / h;
+
+        //const geometry = new THREE.PlaneGeometry(aspectRatio, 1);
+        const geometry = new THREE.CylinderGeometry(0.5, .5, 0.9, 32, 1, true);
+        const mesh = new THREE.Mesh(geometry, material);
+
+        // Create 2D canvas for click map
+        const mapCanvas = document.createElement('canvas');
+        mapCanvas.width = w;
+        mapCanvas.height = h; 
+        mapCanvas.hidden = 'hidden';
+        document.body.appendChild(mapCanvas);
+
+        const mapContext = mapCanvas.getContext('2d', {
+          willReadFrequently: true
+        });
+
+        const mapImage = new Image();
+        mapImage.addEventListener("load", () => {
+          mapContext.drawImage(mapImage, 0, 0);
+        });
+        mapImage.src = `images/${ map }`;
+        
+        return {
+          mesh: mesh,
+          map: mapContext
+        };
+      };
+
+      const ewenHouse = await createHouse('ewen_house.jpg', 'ewen_house_map.jpg');
+      const fionaHouse = await createHouse('fiona_house.jpg', 'fiona_house_map.jpg');
+      const combinedHouse = await createHouse('combined_house.png', 'combined_house_map.jpg');
+
+      const houses = [combinedHouse];
+
+      //houses[0].mesh.position.y = 0.5;
+      //houses[1].mesh.position.y = -0.5;
+
+      houses.forEach(house => {
+        scene.add(house.mesh);
       });
-      const cube = new THREE.Mesh( geometry, material );
-      scene.add( cube );
 
-      camera.position.z = 5;
+      camera.position.z = 2;
 
+      const raycaster = new THREE.Raycaster();
+      
+      const onClick = event => {
+        event.preventDefault();
+        const x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+        const y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+        raycaster.setFromCamera({ x, y }, camera);
+        const intersects = raycaster.intersectObjects(houses.map(house => house.mesh));
+
+        console.log(intersects);
+
+        if (intersects.length > 0) {
+          const house = houses.find(house => house.mesh === intersects[0].object);
+
+          if (house) {
+            const context = house.map;
+
+            const w = context.canvas.width;
+            const h = context.canvas.height;
+
+            const x = Math.round(intersects[0].uv.x * w);
+            const y = Math.round(h - intersects[0].uv.y * h);
+
+            const p = context.getImageData(x, y, 1, 1);
+
+            console.log(p.data[0]);
+          }
+        }
+      };
+
+      document.addEventListener('click', onClick, false);
+        
       function animate() {
-        requestAnimationFrame( animate );
+        requestAnimationFrame(animate);
 
-				cube.rotation.x += 0.01;
-				cube.rotation.y += 0.01;
+				//house.rotation.x += 0.01;
+				//house.rotation.y += 0.01;
+        houses.forEach(({ mesh }) => mesh.rotation.y += 0.005);
 
-        renderer.render( scene, camera );
+        renderer.render(scene, camera);
       }
       animate();
+     
 		</script>
 	</body>
 </html>
