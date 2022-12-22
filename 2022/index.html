@@ -23,6 +23,9 @@
 
 			const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const light = new THREE.DirectionalLight(0xfff0dd, 1);
+      light.position.set(5, 10, 10);
+      scene.add(light);
 
       const renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -34,17 +37,17 @@
       const createHouse = async (image, map) => {
         // Add image to mesh
         const texture = await loader.loadAsync(`images/${ image }`);
-        const material = new THREE.MeshBasicMaterial({ 
+        const material = new THREE.MeshPhysicalMaterial({ 
           map: texture,
           transparent: true,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          transmission: 0
         });
 
         const w = texture.image.width;
         const h = texture.image.height;
         const aspectRatio = w / h;
 
-        //const geometry = new THREE.PlaneGeometry(aspectRatio, 1);
         const geometry = new THREE.CylinderGeometry(0.5, .5, 1 / aspectRatio * 2, 32, 1, true);
         const mesh = new THREE.Mesh(geometry, material);
 
@@ -72,14 +75,44 @@
       };
 
       const createBall = () => {
-        // Add image to mesh
-        const material = new THREE.MeshBasicMaterial({ 
+        /*
+        // Doesn't seem to play well with other transparent objects
+        const material = new THREE.MeshPhysicalMaterial({
+          roughness: 0.2,  
+          transmission: 0.8,  
+          thickness: 0.3
+        });
+        */
+        /*
+        const material = new THREE.MeshStandardMaterial({
+          opacity: 0.5,
+          transparent: true,
+          metalness: 1,
+          roughness: 1
+        });
+        */
+        const material = new THREE.MeshPhongMaterial({
           opacity: 0.2,
-          transparent: true
+          transparent: true,
+          color: 0xffffff,
+          specular: 0xffffff,
+          shininess: 20
         });
 
-        const geometry = new THREE.SphereGeometry(0.8, 32, 32);
+        const geometry = new THREE.SphereGeometry(0.7, 32, 32);
         const mesh = new THREE.Mesh(geometry, material);
+        
+        return mesh;
+      };
+
+      const createBase = () => {
+        const material = new THREE.MeshStandardMaterial({
+          color: 0x000000
+        });
+
+        const geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32, 1, true);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.y -= 0.5;
         
         return mesh;
       };
@@ -98,6 +131,7 @@
       });
 
       scene.add(createBall());
+      scene.add(createBase());
 
       camera.position.z = 2;
 
