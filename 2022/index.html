@@ -8,6 +8,25 @@
         margin: 0; 
       }
 
+      .banner {
+        position: absolute;
+        width: 100%;
+        max-width: 1000px;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+
+      .year {
+        position: absolute;
+        width: 30%;
+        max-width: 400px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+
       .pictureDiv {
         display: grid;
         height: 80%;
@@ -28,10 +47,12 @@
 		</style>
 	</head>
 	<body>
+    <img src='images/banner.png' class='banner' />
+    <img src='images/year.png' class='year' />
     <div class='pictureDiv'>
       <img id='picture' class='picture' style='display: none' />
-      <video id='video' preload loop autoplay muted class='picture' style='display: none'>
-        <source src='images/pictures/PXL_20221001_141253523.mp4' type='video/mp4' />
+      <video id='video' controls preload loop autoplay muted class='picture' style='display: none'>
+        <source type='video/mp4' />
       </video>
     </div>
 
@@ -48,18 +69,30 @@
 		<script type='module'>
       import * as THREE from 'three';
 
-      const pictures = [
+      const pictures = [        
+        'PXL_20221001_141253523.mp4',
+        'PXL_20221029_115038587.MP.jpg',
         'Fiona_Soccer.jpg',
-        'PXL_20220827_230804758.MP.jpg',
+        'PXL_20221217_152054673.mp4',
+        'IMG_20220708_093329110.jpg',
+        'IMG_20220709_110745735.jpg',
+        'IMG_20220828_161409406_HDR.jpg',
         'PXL_20220829_112726650.MP.jpg',
         'PXL_20221001_160937463.MP.jpg',
-        'PXL_20221029_115038587.MP.jpg',
+        'IMG_20220312_163547132.jpg',
         'PXL_20221030_224732161.MP.jpg',
-        'PXL_20221218_011403538.jpg',
-        'TwinsBday.jpg',
-        'PXL_20221001_141253523.mp4',
-        'PXL_20221217_152054673.mp4',
+        'TwinsBday.jpg'
       ];
+
+      const picture = document.getElementById('picture');
+      picture.onload = () => {
+        picture.style.display = 'block';  
+      };
+
+      const video = document.getElementById('video');      
+      video.oncanplay = () => {
+        video.style.display = 'block';  
+      };
 
 			const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -71,6 +104,15 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor(0x00003f );
       document.body.appendChild(renderer.domElement);
+
+      const onWindowResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      window.addEventListener('resize', onWindowResize, false);
 
       const loader = new THREE.TextureLoader();
 
@@ -91,17 +133,7 @@
 
         const geometry = new THREE.CylinderGeometry(0.5, 0.5, 1 / aspectRatio * 2, 32, 1, true);
         const mesh = new THREE.Mesh(geometry, material);
-
-
-
-
-        const hMaterial = new THREE.MeshStandardMaterial({ 
-          map: bumpTexture,
-          opacity: 0.1,
-          transparent: true
-        });
-        const hGeometry = new THREE.CylinderGeometry(0.51, 0.51, 1 / aspectRatio * 2, 32, 1, true);
-        const hMesh = new THREE.Mesh(hGeometry, hMaterial);
+        mesh.rotation.y = Math.random() * 360;
 
         // Create 2D canvas for click map
         const mapCanvas = document.createElement('canvas');
@@ -122,7 +154,6 @@
         
         return {
           mesh: mesh,
-          highlight: hMesh,
           map: mapContext
         };
       };
@@ -143,34 +174,30 @@
 
       const createBase = () => {
         const material = new THREE.MeshStandardMaterial({
-          color: 0x000000
+          color: 0x000000,
+          map: loader.load('images/year.png')
         });
 
-        const geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32, 1, true);
+        const geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 32, 1, true);
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.y -= 0.5;
+        mesh.position.y -= 0.55;
+
+        mesh.rotation.y = 180 
         
         return mesh;
       };
 
-      //const ewenHouse = await createHouse('ewen_house.jpg', 'ewen_house_map.jpg');
-      //const fionaHouse = await createHouse('fiona_house.jpg', 'fiona_house_map.jpg');
       const combinedHouse = await createHouse('combined_house.png', 'combined_house_map.png', 'combined_house_bump.png');
-
       const houses = [combinedHouse];
-
-      //houses[0].mesh.position.y = 0.5;
-      //houses[1].mesh.position.y = -0.5;
 
       houses.forEach(house => {
         scene.add(house.mesh);
-        scene.add(house.highlight);
       });
 
       scene.add(createBall());
       scene.add(createBase());
 
-      camera.position.z = 2;
+      camera.position.z = 3;
 
       const raycaster = new THREE.Raycaster();
 
@@ -192,8 +219,6 @@
 
       let clickHouse = null;
       let clickValue = null;
-      const picture = document.getElementById('picture');
-      const video = document.getElementById('video');
 
       const onMouseDown = event => {
         if (clickValue !== null) {
@@ -245,21 +270,21 @@
         if (clickHouse && clickValue !== null) {          
           clickHouse.mesh.material.bumpScale = 1;
 
+          console.log(clickValue);
+
           const image = `images/pictures/${ pictures[clickValue] }`;
 
           if (image.includes('.mp4')) {
             video.src = image;
-            video.style.display = 'block'; 
           }
           else {
-            picture.src = image;
-            picture.style.display = 'block';            
+            picture.src = image;           
           }
         }
       };
 
-      document.addEventListener('mousedown', onMouseDown);
-      document.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('mousedown', onMouseDown, false);
+      document.addEventListener('mouseup', onMouseUp, false);
         
       function animate() {
         requestAnimationFrame(animate);
@@ -267,7 +292,6 @@
 				const rotation = 0.002;
         houses.forEach(({ mesh, highlight }) => {
           mesh.rotation.y += rotation;
-          highlight.rotation.y += rotation;
         });
 
         renderer.render(scene, camera);
