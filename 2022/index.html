@@ -133,18 +133,34 @@
       camera.position.z = 2;
 
       const raycaster = new THREE.Raycaster();
-      
-      const onClick = event => {
+
+      const castRay = event => {
         event.preventDefault();
         const x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
         const y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
         raycaster.setFromCamera({ x, y }, camera);
         const intersects = raycaster.intersectObjects(houses.map(house => house.mesh));
 
-        console.log(intersects);
+        return intersects.length > 0 ? intersects[0] : null;
+      };
 
-        if (intersects.length > 0) {
-          const house = houses.find(house => house.mesh === intersects[0].object);
+      const onMouseDown = event => {
+        const intersect = castRay(event);
+
+        if (intersect) {
+          const house = houses.find(house => house.mesh === intersect.object);
+
+          if (house) {
+            house.mesh.material.bumpScale = 0;
+          }
+        }
+      };
+
+      const onMouseUp = event => {
+        const intersect = castRay(event);
+
+        if (intersect) {
+          const house = houses.find(house => house.mesh === intersect.object);
 
           if (house) {
             const context = house.map;
@@ -152,17 +168,19 @@
             const w = context.canvas.width;
             const h = context.canvas.height;
 
-            const x = Math.round(intersects[0].uv.x * w);
-            const y = Math.round(h - intersects[0].uv.y * h);
+            const x = Math.round(intersect.uv.x * w);
+            const y = Math.round(h - intersect.uv.y * h);
 
             const p = context.getImageData(x, y, 1, 1);
 
-            console.log(p.data[0]);
+            house.mesh.material.bumpScale = 1;
           }
         }
       };
 
-      document.addEventListener('click', onClick, false);
+
+      document.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mouseup', onMouseUp);
         
       function animate() {
         requestAnimationFrame(animate);
