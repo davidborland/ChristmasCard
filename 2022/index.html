@@ -48,10 +48,10 @@
       }
 
       .picture {
-        max-width: 80%;
+        width: 80%;
         max-height: 80vh;
         margin: auto;
-        border: 4px outset silver;
+        object-fit: contain;
       }
 		</style>
 	</head>
@@ -84,17 +84,17 @@
 
       const pictures = [        
         'PXL_20221001_141253523.mp4',
-        'PXL_20221029_115038587.MP.jpg',
+        'PXL_20221029_115038587.MP_small.jpg',
         'Fiona_Soccer.jpg',
         'PXL_20221217_152054673.mp4',
-        'IMG_20220708_093329110.jpg',
-        'IMG_20220709_110745735.jpg',
-        'IMG_20220828_161409406_HDR.jpg',
-        'PXL_20220829_112726650.MP.jpg',
-        'PXL_20221001_160937463.MP.jpg',
-        'IMG_20220312_163547132.jpg',
-        'PXL_20221030_224732161.MP.jpg',
-        'TwinsBday.jpg'
+        'IMG_20220708_093329110_small.jpg',
+        'IMG_20220709_110745735_small.jpg',
+        'IMG_20220828_161409406_HDR_small.jpg',
+        'PXL_20220829_112726650.MP_small.jpg',
+        'PXL_20221001_160937463.MP_small.jpg',
+        'IMG_20220312_163547132_small.jpg',
+        'PXL_20221030_224732161.MP_small.jpg',
+        'TwinsBday_small.jpg'
       ];
 
       const clicks = pictures.map(() => false);
