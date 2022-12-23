@@ -429,18 +429,20 @@
       document.addEventListener('pointermove', onMouseMove, false);
       //document.addEventListener('touchmove', onMouseMove, false);
         
+      let clock = new THREE.Clock();
       function animate() {
         requestAnimationFrame(animate);
+        const elapsed = clock.getDelta();
 
-				const rotation = 0.0025;
+				const rotation = 0.2 * elapsed;
         houses.forEach(({ mesh, highlight }) => {
           mesh.rotation.y += rotation;
         });
 
         const positions = particles.geometry.attributes.position.array;
 
-        const delta = 0.001;
-        const g = 0.001;
+        const delta = 0.05 * elapsed;
+        const g = 0.05 * elapsed;
         const offset = () => Math.random() * delta - delta / 2;
 
         for (let i = 0; i < positions.length; i += 3) {
