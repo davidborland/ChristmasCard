@@ -383,10 +383,10 @@
         if (mouseDown) shakeItUp(movement);
       }
       
-      document.addEventListener('mousedown', onMouseDown, false);
-      document.addEventListener('mouseup', onMouseUp, false);
-      document.addEventListener('mousemove', onMouseMove, false);
-      document.addEventListener('touchmove', onMouseMove, false);
+      document.addEventListener('pointerdown', onMouseDown, false);
+      document.addEventListener('pointerup', onMouseUp, false);
+      document.addEventListener('pointermove', onMouseMove, false);
+      //document.addEventListener('touchmove', onMouseMove, false);
         
       function animate() {
         requestAnimationFrame(animate);
