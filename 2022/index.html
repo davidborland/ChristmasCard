@@ -47,6 +47,18 @@
         bottom: 10%;
       }
 
+      #maxDiv {
+        position: absolute;
+        width: 100%;
+        height: 100%;      
+        color: #2676cc;
+        font-family: helvetica;
+        font-size: 50pt;
+        background-color: #00003f;
+        text-align: center;
+        font-family: cursive;
+      }
+
       .picture {
         width: 80%;
         max-height: 80vh;
@@ -62,9 +74,13 @@
       Click count:
       <div><span id ='clickCountDiv'>0</span> / 12 items</div>
     </div>
+    <div id='maxDiv' style='display: none;' />
+      <div>In loving memory of Mad Max</div>
+      <div>2006? - 2022</div>
+    </div>
     <div class='pictureDiv'>
-      <img id='picture' class='picture' style='display: none' />
-      <video id='video' controls preload loop autoplay muted class='picture' style='display: none'>
+      <img id='picture' class='picture' style='display: none;' />
+      <video id='video' controls preload loop autoplay muted class='picture' style='display: none;'>
         <source type='video/mp4' />
       </video>
     </div>
@@ -109,8 +125,10 @@
         video.style.display = 'block';  
       };
 
-      const clickCountDiv =  document.getElementById('clickCountDiv');
+      const clickCountDiv = document.getElementById('clickCountDiv');
       let clickCount = 0;      
+
+      const maxDiv = document.getElementById('maxDiv');
 
 			const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -120,7 +138,7 @@
 
       const renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setClearColor(0x00003f );
+      renderer.setClearColor(0x00003f);
       document.body.appendChild(renderer.domElement);
 
       const onWindowResize = () => {
@@ -307,10 +325,22 @@
       let clickHouse = null;
       let clickValue = null;
       let mouseDown = false;
+      let showMax = false;
 
       const onMouseDown = event => {
         mouseDown = true;
 
+        if (showMax) {
+          showMax = false;
+          maxDiv.style.display = 'none';
+          picture.style.display = 'none';
+          picture.src = '';
+          for (let i = 0; i < clicks.length; i++) clicks[i] = false;
+          clickCountDiv.textContent = 0;
+
+          return;
+        }
+        
         if (clickValue !== null) {
           picture.style.display = 'none';
           picture.src = '';
@@ -319,6 +349,13 @@
           video.src = '';
           
           clickValue = null;
+          
+          if (!clicks.includes(false)) {
+            showMax = true;
+            maxDiv.style.display = 'block';
+            picture.style.display = 'block';
+            picture.src = 'images/pictures/Twins (233 of 818)_small.jpg';
+          }
         }
         else {
           event.preventDefault();
