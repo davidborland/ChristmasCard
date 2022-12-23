@@ -399,7 +399,7 @@
         const positions = particles.geometry.attributes.position.array;
 
         const delta = 0.001;
-        const g = 0.0005;
+        const g = 0.001;
         const offset = () => Math.random() * delta - delta / 2;
 
         for (let i = 0; i < positions.length; i += 3) {
