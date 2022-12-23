@@ -133,6 +133,7 @@
 
         const geometry = new THREE.CylinderGeometry(0.5, 0.5, 1 / aspectRatio * 2, 32, 1, true);
         const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.y -= 0.015;
         mesh.rotation.y = Math.random() * 360;
 
         // Create 2D canvas for click map
@@ -158,6 +159,8 @@
         };
       };
 
+      const ballRadius = 0.7;
+
       const createBall = () => {        
         const material = new THREE.MeshPhysicalMaterial({
           roughness: 0.1,  
@@ -166,7 +169,7 @@
           reflectivity: 0.5
         });
 
-        const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+        const geometry = new THREE.SphereGeometry(ballRadius, 32, 32);
         const mesh = new THREE.Mesh(geometry, material);
         
         return mesh;
@@ -187,6 +190,48 @@
         return mesh;
       };
 
+      const createParticles = count => {
+        const sprite = loader.load('images/S1603_alpha.png');
+
+        const size = 0.05;
+
+        const material = new THREE.PointsMaterial({ 
+          size: size, 
+          map: sprite, 
+          blending: THREE.AdditiveBlending, 
+          depthTest: false, 
+          opacity: 0.5,
+          transparent : true 
+        });
+
+        const points = [];
+
+        for (let i = 0; i < count; i ++ ) {
+          const u = Math.random();
+          const v = Math.random();
+          const theta = u * 2.0 * Math.PI;
+          const phi = Math.acos(2.0 * v - 1.0);
+          const r = Math.cbrt(Math.random()) * ballRadius - 0.01;
+          const sinTheta = Math.sin(theta);
+          const cosTheta = Math.cos(theta);
+          const sinPhi = Math.sin(phi);
+          const cosPhi = Math.cos(phi);
+
+          const vertex = new THREE.Vector3();
+          vertex.x = r * sinPhi * cosTheta;
+          vertex.y = r * sinPhi * sinTheta;
+          vertex.z = Math.abs(r * cosPhi);
+
+          if (vertex.y > -0.45) points.push( vertex );
+        }
+         
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+        const particles = new THREE.Points(geometry, material);
+
+        return particles;
+      };
+
       const combinedHouse = await createHouse('combined_house.png', 'combined_house_map.png', 'combined_house_bump.png');
       const houses = [combinedHouse];
 
@@ -196,6 +241,9 @@
 
       scene.add(createBall());
       scene.add(createBase());
+
+      const particles = (createParticles(1000));
+      scene.add(particles);
 
       camera.position.z = 3;
 
@@ -289,10 +337,31 @@
       function animate() {
         requestAnimationFrame(animate);
 
-				const rotation = 0.002;
+				const rotation = 0.0025;
         houses.forEach(({ mesh, highlight }) => {
           mesh.rotation.y += rotation;
         });
+
+        console.log(particles);
+
+        const positions = particles.geometry.attributes.position.array;
+
+        const delta = 0.001;
+        const g = 0.0005;
+        const offset = () => Math.random() * delta - delta / 2;
+
+        for (let i = 0; i < positions.length; i += 3) {
+          const x = positions[i] + offset();
+          const y = positions[i + 1] + offset() - g;
+          const z = positions[i + 2] + offset();
+
+          if (y > -0.45 && x * x + y * y + z * z < ballRadius * ballRadius - 0.01) {
+            positions[i] = x;
+            positions[i + 1] = y;
+            positions[i + 2] = z;
+          }
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
 
         renderer.render(scene, camera);
       }
