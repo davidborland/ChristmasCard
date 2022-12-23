@@ -82,6 +82,10 @@
 		</style>
 	</head>
 	<body>    
+    <audio id='lastChristmas' loop>
+      <source src='audio/55430_Last-Christmas-.mp3' type='audio/mp3' />
+    </audio>
+
     <div id='loading'>Loading...</div>
     <img src='images/banner.png' class='banner' />
     <img src='images/year.png' class='year' />
@@ -345,6 +349,8 @@
       let showMax = false;
 
       const onMouseDown = event => {
+        document.getElementById('lastChristmas').play(); 
+
         mouseDown = true;
 
         if (showMax) {
