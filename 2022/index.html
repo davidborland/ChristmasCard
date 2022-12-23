@@ -27,6 +27,15 @@
         margin: auto;
       }
 
+      .clickDiv {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        color: #2676cc;
+        font-family: helvetica;
+        font-size: 20pt;
+      }
+
       .pictureDiv {
         display: grid;
         height: 80%;
@@ -49,6 +58,10 @@
 	<body>
     <img src='images/banner.png' class='banner' />
     <img src='images/year.png' class='year' />
+    <div class='clickDiv'>
+      Click count:
+      <div><span id ='clickCountDiv'>0</span> / 12 items</div>
+    </div>
     <div class='pictureDiv'>
       <img id='picture' class='picture' style='display: none' />
       <video id='video' controls preload loop autoplay muted class='picture' style='display: none'>
@@ -84,6 +97,8 @@
         'TwinsBday.jpg'
       ];
 
+      const clicks = pictures.map(() => false);
+
       const picture = document.getElementById('picture');
       picture.onload = () => {
         picture.style.display = 'block';  
@@ -93,6 +108,9 @@
       video.oncanplay = () => {
         video.style.display = 'block';  
       };
+
+      const clickCountDiv =  document.getElementById('clickCountDiv');
+      let clickCount = 0;      
 
 			const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -232,6 +250,27 @@
         return particles;
       };
 
+      const shakeItUp = () => {
+        const positions = particles.geometry.attributes.position.array;
+
+        const delta = 0.01;
+        const g = 0.001;
+        const offset = () => Math.random() * delta - delta / 2;
+
+        for (let i = 0; i < positions.length; i += 3) {
+          const x = positions[i] + offset();
+          const y = positions[i + 1] + offset() + g;
+          const z = positions[i + 2] + offset();
+
+          if (y > -0.45 && x * x + y * y + z * z < ballRadius * ballRadius - 0.01) {
+            positions[i] = x;
+            positions[i + 1] = y;
+            positions[i + 2] = z;
+          }
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+      };
+
       const combinedHouse = await createHouse('combined_house.png', 'combined_house_map.png', 'combined_house_bump.png');
       const houses = [combinedHouse];
 
@@ -267,8 +306,11 @@
 
       let clickHouse = null;
       let clickValue = null;
+      let mouseDown = false;
 
       const onMouseDown = event => {
+        mouseDown = true;
+
         if (clickValue !== null) {
           picture.style.display = 'none';
           picture.src = '';
@@ -315,10 +357,14 @@
       };
 
       const onMouseUp = event => {
+        mouseDown = false;
+
         if (clickHouse && clickValue !== null) {          
           clickHouse.mesh.material.bumpScale = 1;
 
-          console.log(clickValue);
+          clicks[clickValue] = true;
+
+          clickCountDiv.textContent = clicks.reduce((count, value) => count + (value === true ? 1 : 0), 0);
 
           const image = `images/pictures/${ pictures[clickValue] }`;
 
@@ -330,9 +376,14 @@
           }
         }
       };
-
+      
+      const onMouseMove = event => {
+        if (mouseDown) shakeItUp();
+      }
+      
       document.addEventListener('mousedown', onMouseDown, false);
       document.addEventListener('mouseup', onMouseUp, false);
+      document.addEventListener('mousemove', onMouseMove, false);
         
       function animate() {
         requestAnimationFrame(animate);
@@ -341,8 +392,6 @@
         houses.forEach(({ mesh, highlight }) => {
           mesh.rotation.y += rotation;
         });
-
-        console.log(particles);
 
         const positions = particles.geometry.attributes.position.array;
 
