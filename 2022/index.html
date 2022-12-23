@@ -250,10 +250,10 @@
         return particles;
       };
 
-      const shakeItUp = () => {
+      const shakeItUp = movement => {
         const positions = particles.geometry.attributes.position.array;
 
-        const delta = 0.01;
+        const delta = movement * 0.001;
         const g = 0.001;
         const offset = () => Math.random() * delta - delta / 2;
 
@@ -378,7 +378,9 @@
       };
       
       const onMouseMove = event => {
-        if (mouseDown) shakeItUp();
+        const movement = Math.sqrt(event.movementX * event.movementX + event.movementY * event.movementY);
+
+        if (mouseDown) shakeItUp(movement);
       }
       
       document.addEventListener('mousedown', onMouseDown, false);
