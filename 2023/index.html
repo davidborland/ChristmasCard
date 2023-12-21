@@ -8,13 +8,39 @@
   
   
   <style>
+    #solved-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    #solved-list .list-item {
+      text-transform: uppercase;
+      border-radius: 6px;
+      background-color: #efefe6;
+      min-height: 70px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.1s linear;
+    }
+
+    #solved-list .list-item .words {
+      font-weight: normal;
+    }
+
     #word-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
       grid-gap: 8px;
     }
 
-    .grid-cell {
+    #word-grid .grid-cell {
       text-transform: uppercase;
       border-radius: 6px;
       background-color: #efefe6;
@@ -25,11 +51,16 @@
       justify-items: center;
       cursor: pointer;
       user-select: none;
+      transition: all 0.1s linear;
     }
 
-    .grid-cell.selected {      
+    #word-grid .grid-cell.selected {      
       background: #5a594e;
       color: #fff;
+    }
+
+    #word-grid .grid-cell.invalid {
+      background: #7f7f7f;
     }
 
     #button-toolbar {
@@ -55,6 +86,10 @@
       user-select: none;
     }
 
+    #button-toolbar .button.down {
+      background-color: #e2e2e2;
+    }
+
     #button-toolbar .button.submit {
       color: #7f7f7f;
       border-color: #7f7f7f;
@@ -63,6 +98,24 @@
     #button-toolbar .button.submit.active {
       color: #fff;
       background-color: #000;
+    }
+
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #000;
+      color: #fff;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 14px;
+      opacity: 0%;
+      transition: all 0.2s linear;
+    }
+
+    #message.show {
+      opacity: 100%;
     }
 
   </style>
@@ -74,13 +127,15 @@
   <div class='text-center mb-4'>
     Create four groups of four!
   </div>
+  <div id='solved-list'></div>
   <div id='word-grid'></div>
   <div id='button-toolbar'>
-    <div class='button'>Shuffle</div>
-    <div class='button'>Deselect All</div>
-    <div class='button submit'>Submit</div>
+    <div id='shuffle-button' class='button'>Shuffle</div>
+    <div id='deselect-button' class='button'>Deselect All</div>
+    <div id='submit-button' class='button submit'>Submit</div>
   </div>
 </div>
+<div id='message'></div>
 
 <script type='module'>
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
@@ -94,44 +149,144 @@
     return filtered;
   };
 
-  const shuffleWords = groups => d3.shuffle(d3.merge(groups.map(group => group.words)));
+  const getWords = groups => d3.merge(groups.map(group => group.words));
+
+  const drawSolved = groups => {
+    const colors = [
+      '#f9df6d',
+      '#a0c351',
+      '#b0c4ef',
+      '#ba81c5'
+    ];
+
+    const item = d3.select('#solved-list').selectAll('.list-item')
+      .data(groups)
+      .join('div')
+      .attr('class', 'list-item')      
+      .style('background-color', (d, i) => colors[i])
+      .text(d => d.category)
+      .append('div')
+      .attr('class', 'words')
+      .text(d => d.words.join(', '));
+  };
+
+  const drawGrid = words => {
+    d3.select('#word-grid').selectAll('.grid-cell')
+      .data(d3.shuffle(words))
+      .join('div')
+      .attr('class', 'grid-cell')
+      .text(d => d)
+      .classed('selected', d => selected.includes(d))
+      .on('mousedown', function(event, d) {      
+        const wordSelected = selected.includes(d);
+
+        if (!wordSelected && selected.length < 4) {
+          d3.select(this)
+            .classed('selected', true);
+
+          selected.push(d);
+        }
+        else if (wordSelected) {
+          d3.select(this)
+            .classed('selected', false);
+
+          selected.splice(selected.indexOf(d), 1);
+        }
+
+        // Update submit button
+        d3.select('.submit')
+          .classed('active', selected.length === 4);
+      });
+  };
 
   // Get data
-  const allGroups = await d3.json('groups.json');
+  const groupData = await d3.json('groups.json');
 
   // Filter data
-  const groups = filterGroups(allGroups);
+  const allGroups = filterGroups(groupData);
+  const groups = allGroups.slice();
+  const solved = [];
 
-  // Create grid
-  const words = shuffleWords(groups);
+  // Word variables
+  let words = getWords(groups);
   let selected = [];
 
-  d3.select('#word-grid').selectAll('.grid-row')
-    .data(words)
-    .join('div')
-    .attr('class', 'grid-cell')
-    .text(d => d)
-    .on('mousedown', function(event, d) {      
-      const wordSelected = selected.includes(d);
-
-      if (!wordSelected && selected.length < 4) {
-        selected.push(d);
-        
-        d3.select(this)
-          .classed('selected', true);
-      }
-      else if (wordSelected) {
-        selected.splice(selected.indexOf(d), 1);
-
-        d3.select(this)
-          .classed('selected', false);
-      }
-
-      // Update submit button
-      d3.select('.submit')
-        .classed('active', selected.length === 4);
-    });
+  drawGrid(words);
     
+  // Buttons
+  d3.select('#shuffle-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      drawGrid(words);
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
+    });
+
+  d3.select('#deselect-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      d3.selectAll('.grid-cell')
+        .classed('selected', false);
+
+      selected = [];
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
+    });
+
+  d3.select('#submit-button')
+    .on('mousedown', function () {
+      let maxCount = 0;
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i];
+        const count = group.words.reduce((count, word) => count + (selected.includes(word) ? 1 : 0), 0);
+
+        maxCount = Math.max(maxCount, count);          
+
+        if (maxCount === 4) {
+          solved.push(group);
+          groups.splice(i, 1);
+          break;
+        }
+      }
+
+      if (maxCount === 4) {
+        selected = [];
+        words = getWords(groups);
+
+        drawSolved(solved);
+        drawGrid(words);
+      }
+      else {
+        if (maxCount === 3) {
+          d3.select('#message')
+            .classed('show', true)
+            .text('One away...');
+
+          setTimeout(() => {
+            d3.select('#message')
+              .classed('show', false)
+          }, 2000);
+        }
+
+        d3.selectAll('.selected')
+          .classed('invalid', true);
+
+        setTimeout(() => {
+          d3.selectAll('.selected')
+            .classed('invalid', false);
+        }, 2000);
+      }
+    })
+    .on('mouseup', function () {
+    });
 
 </script>
 
