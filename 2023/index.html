@@ -24,7 +24,14 @@
       align-items: center;
       justify-items: center;
       cursor: pointer;
+      user-select: none;
     }
+
+    .grid-cell.selected {      
+      background: #5a594e;
+      color: #fff;
+    }
+
   </style>
 </head>
 
@@ -59,15 +66,30 @@
 
   // Create grid
   const words = shuffleWords(groups);
+  let selected = [];
 
   d3.select('#word-grid').selectAll('.grid-row')
     .data(words)
     .join('div')
     .attr('class', 'grid-cell')
     .text(d => d)
-    .on('click', d => {
-      console.log(d);
+    .on('mousedown', function(event, d) {      
+      const wordSelected = selected.includes(d);
+
+      if (!wordSelected && selected.length < 4) {
+        selected.push(d);
+        
+        d3.select(this)
+          .classed('selected', true);
+      }
+      else if (wordSelected) {
+        selected.splice(selected.indexOf(d), 1);
+
+        d3.select(this)
+          .classed('selected', false);
+      }
     });
+    
 
 </script>
 
