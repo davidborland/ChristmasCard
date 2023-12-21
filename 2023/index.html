@@ -121,34 +121,43 @@
       opacity: 100%;
     }
 
-    #picture {
+    #overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%; 
+      height: 100%;
       background-color: rgba(0, 0, 0, 0);
       transition: all 0.2s linear;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: stretch;
-      gap: 10px;
-      padding: 50px;
-      max-width: 100%;
+      visibility: hidden;
+    }
+
+    #overlay.show {
+      background-color: rgba(0, 0, 0, 0.8);
+      visibility: visible;
+    }
+
+    #overlay .container {
       height: 100%;
     }
 
-    #picture.show {
-      background-color: rgba(0, 0, 0, 0.75);
-      visibility: visible;
+    #picture {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      height: 100%;
     }
 
     #picture img {
       border-radius: 10px;  
       max-width: 100%; 
-      max-height: 80%;
+      max-height: calc(100% - 150px);
       object-fit: contain;
+    }
+
+    #image-buttons .button {
+      background-color: #fff;
     }
 
   </style>
@@ -165,24 +174,35 @@
   </div>
   <div id='solved-list'></div>
   <div id='word-grid'></div>
-  <div id='toolbar' class='button-toolbar' class='mt-4'>
+  <div id='toolbar' class='button-toolbar mt-4'>
     <div id='shuffle-button' class='button'>Shuffle</div>
     <div id='deselect-button' class='button'>Deselect All</div>
     <div id='submit-button' class='button submit'>Submit</div>
   </div>
 </div>
 <div id='message'></div>
-<div id='picture'>
-  <div class='list-item'>hello</div>
-  <img src='/images/IMG_20220708_093329110_small.jpg' />
-  <div id='image-buttons' class='button-toolbar'>
-    <div id='next-button' class='button'>Next</div>
-    <div id='close-button' class='button'>Close</div>
+<div id='overlay'>
+  <div class='container px-4'>
+    <div id='picture'>
+      <div id='picture-solved-list'></div>
+      <img src='/images/IMG_20220708_093329110_small.jpg' />
+      <div id='image-buttons' class='button-toolbar'>
+        <div id='next-button' class='button'>Next</div>
+        <div id='close-button' class='button'>Close</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script type='module'>
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
+  const colors = [
+    '#f9df6d',
+    '#a0c351',
+    '#b0c4ef',
+    '#ba81c5'
+  ];
 
   // Utility functions
   const filterGroups = groups => {
@@ -195,15 +215,8 @@
 
   const getWords = groups => d3.merge(groups.map(group => group.words));
 
-  const drawSolved = groups => {
-    const colors = [
-      '#f9df6d',
-      '#a0c351',
-      '#b0c4ef',
-      '#ba81c5'
-    ];
-
-    const item = d3.select('#solved-list').selectAll('.list-item')
+  const drawSolved = (selection, groups) => {
+    const item = selection.selectAll('.list-item')
       .data(groups)
       .join('div')
       .attr('class', 'list-item')      
@@ -302,22 +315,17 @@
       }
 
       if (maxCount === 4) {
-        d3.select('.container')
-          .style('pointer-events', 'none');
+        const group = solved[solved.length - 1];
 
-        setTimeout(() => {
-          d3.select('#picture')
-            .classed('show', true);
+        drawSolved(d3.select('#picture-solved-list'), [group]);
 
-            
-          d3.select('.container')
-            .style('pointer-events', null);
-        }, 1000);
+        d3.select('#overlay')
+          .classed('show', true);
 
         selected = [];
         words = getWords(groups);
 
-        drawSolved(solved);
+        drawSolved(d3.select('#solved-list'), solved);
         drawGrid(words);
       }
       else {
