@@ -1,0 +1,44 @@
+[
+  {
+    "category": "soccer",
+    "words": [
+      "antelope",
+      "coach",
+      "academy",
+      "goal",
+      "dribble"
+    ]
+  },
+  {
+    "category": "taekwondo",
+    "words": [
+      "medal",
+      "kick",
+      "punch",
+      "break",
+      "spar",
+      "belt"
+    ]
+  },
+  {
+    "category": "vacations",
+    "words": [
+      "acadia",
+      "joshua",
+      "hike",
+      "mount",
+      "maine",
+      "california"
+    ]
+  },
+  {
+    "category": "angus",
+    "words": [
+      "cute",
+      "scruffy",
+      "ears",
+      "walk",
+      "lick"
+    ]
+  }
+]
