@@ -68,7 +68,6 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin: 24px 0;
     }
 
     #button-toolbar .button {
@@ -124,12 +123,15 @@
 <body>
 
 <div class='container p-4'>
+  <h3 class='display-5'>Holiday Connections</h3>
+  <small class='text-muted'>From the Peck Borland family</small>
+  <hr />
   <div class='text-center mb-4'>
     Create four groups of four!
   </div>
   <div id='solved-list'></div>
   <div id='word-grid'></div>
-  <div id='button-toolbar'>
+  <div id='button-toolbar' class='mt-4'>
     <div id='shuffle-button' class='button'>Shuffle</div>
     <div id='deselect-button' class='button'>Deselect All</div>
     <div id='submit-button' class='button submit'>Submit</div>
