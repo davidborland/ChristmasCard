@@ -15,7 +15,7 @@
       margin-bottom: 8px;
     }
 
-    #solved-list .list-item {
+    .list-item {
       text-transform: uppercase;
       border-radius: 6px;
       background-color: #efefe6;
@@ -30,7 +30,7 @@
       transition: all 0.1s linear;
     }
 
-    #solved-list .list-item .words {
+    .list-item .words {
       font-weight: normal;
     }
 
@@ -117,6 +117,32 @@
       opacity: 100%;
     }
 
+    #picture {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0);
+      transition: all 0.2s linear;
+      display: flex;
+      justify-content: center;
+      padding: 50px;
+      max-width: 100%;
+      visibility: hidden;
+    }
+
+    #picture.show {
+      background-color: rgba(0, 0, 0, 0.75);
+      visibility: visible;
+    }
+
+    #picture img {
+      border-radius: 10px;  
+      max-width: 100%; 
+      object-fit: contain;
+    }
+
   </style>
 </head>
 
@@ -138,6 +164,9 @@
   </div>
 </div>
 <div id='message'></div>
+<div id='picture'>
+  <img src='/images/IMG_20220708_093329110_small.jpg' />
+</div>
 
 <script type='module'>
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
@@ -260,6 +289,9 @@
       }
 
       if (maxCount === 4) {
+        d3.select('#picture')
+          .classed('show', true);
+
         selected = [];
         words = getWords(groups);
 
@@ -289,6 +321,12 @@
     })
     .on('mouseup', function () {
     });
+
+    d3.select('#picture')
+      .on('mousedown', function() {
+        d3.select(this)
+          .classed('show', false);
+      });
 
 </script>
 
