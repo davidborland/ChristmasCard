@@ -32,6 +32,39 @@
       color: #fff;
     }
 
+    #button-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 24px 0;
+    }
+
+    #button-toolbar .button {
+      border: black solid 1px;
+      border-radius: 1.5em;
+      height: 3em;
+      font-weight: 600;
+      width: fit-content;
+      display: flex;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #button-toolbar .button.submit {
+      color: #7f7f7f;
+      border-color: #7f7f7f;
+    }
+
+    #button-toolbar .button.submit.active {
+      color: #fff;
+      background-color: #000;
+    }
+
   </style>
 </head>
 
@@ -42,6 +75,11 @@
     Create four groups of four!
   </div>
   <div id='word-grid'></div>
+  <div id='button-toolbar'>
+    <div class='button'>Shuffle</div>
+    <div class='button'>Deselect All</div>
+    <div class='button submit'>Submit</div>
+  </div>
 </div>
 
 <script type='module'>
@@ -88,6 +126,10 @@
         d3.select(this)
           .classed('selected', false);
       }
+
+      // Update submit button
+      d3.select('.submit')
+        .classed('active', selected.length === 4);
     });
     
 
