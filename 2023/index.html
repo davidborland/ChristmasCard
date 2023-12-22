@@ -156,6 +156,19 @@
       max-width: 100%; 
       max-height: calc(100% - 190px);
       object-fit: contain;
+      display: none;
+    }
+
+    #picture video {
+      display: none;
+    }
+
+    #picture img.show {
+      display: block;
+    }
+
+    #picture video.show {
+      display: block;
     }
 
     #card-overlay {
@@ -215,6 +228,9 @@
     <div id='picture' class='mt-4'>
       <div id='picture-solved-list'></div>
       <img />
+      <video controls preload autoplay>
+        <source type='video/mp4' />
+      </video>
       <div id='image-buttons' class='button-toolbar'>
         <div id='next-button' class='button'>Next</div>
         <div id='close-button' class='button'>Close</div>
@@ -340,10 +356,13 @@
   drawGrid(words);
     
   // Buttons
-  d3.select('#refresh-button, #again-button')
+  d3.selectAll('#refresh-button, #again-button')
     .on('mousedown', function () {
       d3.select(this)
         .classed('down', true);
+
+      d3.select('#card-overlay')
+        .classed('show', false);
 
       // Filter data
       allGroups = filterGroups(groupData);
@@ -410,13 +429,33 @@
         let imageIndex = 0;
 
         drawSolved(d3.select('#picture-solved-list'), [group], colors[solved.length - 1]);
+
+        const image = group.images[imageIndex];
+
+        if (image.includes('.mp4')) {
+          d3.select('#picture img')
+            .classed('show', false);
         
-        d3.select('#picture img')
-          .attr('src', `images/${ group.images[imageIndex] }`)
-          .on('load', function() {
-            d3.select('#overlay')
-              .classed('show', true);
-          });
+          d3.select('#picture video')
+            .classed('show', true)
+            .attr('src', `images/${ image }`)
+            .on('oncanplay', function() {
+              d3.select('#overlay')
+                .classed('show', true);
+            });
+        }
+        else {
+          d3.select('#picture video')
+            .classed('show', false);
+        
+          d3.select('#picture img')
+            .classed('show', true)
+            .attr('src', `images/${ image }`)
+            .on('load', function() {
+              d3.select('#overlay')
+                .classed('show', true);
+            });
+        }
 
         d3.select('#next-button')
           .on('mousedown', function () {
@@ -424,8 +463,34 @@
               .classed('down', true);
 
             imageIndex = (imageIndex + 1) % (group.images.length);
-            d3.select('#picture img')
-              .attr('src', `images/${ group.images[imageIndex] }`);
+
+            const image = group.images[imageIndex];
+            
+            if (image.includes('.mp4')) {
+              d3.select('#picture img')
+                .classed('show', false);
+            
+              d3.select('#picture video')
+                .classed('show', true)
+                .attr('src', `images/${ image }`)
+                .classed('show', true)
+                .on('oncanplay', function() {
+                  d3.select('#overlay')
+                    .classed('show', true);
+                });
+            }
+            else {
+              d3.select('#picture video')
+                .classed('show', false);
+            
+              d3.select('#picture img')
+                .classed('show', true)
+                .attr('src', `images/${ image }`)
+                .on('load', function() {
+                  d3.select('#overlay')
+                    .classed('show', true);
+                });
+            }
           })
           .on('mouseup', function () {
             d3.select(this)
@@ -442,6 +507,10 @@
 
             d3.select('.submit')
               .classed('active', false);
+
+            const video = d3.select('#picture video').node();
+            video.pause();
+            video.currentTime = 0;
 
             selected = [];
             words = getWords(groups);
