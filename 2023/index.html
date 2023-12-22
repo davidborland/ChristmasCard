@@ -376,7 +376,7 @@
         drawSolved(d3.select('#picture-solved-list'), [group], colors[solved.length - 1]);
         
         d3.select('#picture img')
-          .attr('src', `/images/${ group.images[imageIndex] }`)
+          .attr('src', `images/${ group.images[imageIndex] }`)
           .on('load', function() {
             d3.select('#overlay')
               .classed('show', true);
@@ -389,7 +389,7 @@
 
             imageIndex = (imageIndex + 1) % (group.images.length);
             d3.select('#picture img')
-              .attr('src', `/images/${ group.images[imageIndex] }`);
+              .attr('src', `images/${ group.images[imageIndex] }`);
           })
           .on('mouseup', function () {
             d3.select(this)
