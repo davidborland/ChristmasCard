@@ -9,8 +9,9 @@
       "dribble"
     ],
     "images": [
-      "IMG_20220708_093329110_small.jpg",
-      "PXL_20220829_112726650.MP_small.jpg"
+      "ewen_soccer_01.jpg",
+      "ewen_soccer_02.jpg",
+      "ewen_soccer_03.jpg"
     ]
   },
   {
@@ -24,8 +25,8 @@
       "belt"
     ],
     "images": [
-      "IMG_20220708_093329110_small.jpg",
-      "PXL_20220829_112726650.MP_small.jpg"
+      "tkd_01.jpg",
+      "tkd_02.jpg"
     ]
   },
   {
@@ -39,8 +40,19 @@
       "california"
     ],
     "images": [
-      "IMG_20220708_093329110_small.jpg",
-      "PXL_20220829_112726650.MP_small.jpg"
+      "maine_01.jpg",
+      "maine_02.jpg",
+      "maine_03.jpg",
+      "maine_04.jpg",
+      "maine_05.jpg",
+      "maine_06.jpg",
+      "maine_07.jpg",
+      "joshua_01.jpg",
+      "joshua_02.jpg",
+      "pisgah_01.jpg",
+      "pisgah_02.jpg",
+      "pisgah_03.jpg",
+      "pisgah_04.jpg"
     ]
   },
   {
@@ -53,8 +65,32 @@
       "lick"
     ],
     "images": [
-      "IMG_20220708_093329110_small.jpg",
-      "PXL_20220829_112726650.MP_small.jpg"
+      "angus_01.jpg",
+      "angus_02.jpg",
+      "angus_03.jpg",
+      "angus_04.jpg",
+      "angus_05.jpg",
+      "angus_06.jpg"
+    ]
+  },
+  {
+    "category": "shows",
+    "words": [
+      "elder",
+      "mastodon",
+      "gojira",
+      "brigade",
+      "sandman",
+      "band"
+    ],
+    "images": [
+      "budos_01.jpg",
+      "claypool_01.jpg",
+      "elder_01.jpg",
+      "elder_02.jpg",
+      "gojira_01.jpg",
+      "mastodon_01.jpg",
+      "sandler_01.jpg"
     ]
   }
 ]
