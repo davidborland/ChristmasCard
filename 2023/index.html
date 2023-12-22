@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Holidays!</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  
+  
+  <style>
+    body {
+      height: 100%;
+      background-image: url('images/background.jpg');
+      background-size: 100vw 100vh;
+      background-repeat: no-repeat;
+      user-select: none;
+    }
+
+    #solved-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .list-item {
+      text-transform: uppercase;
+      border-radius: 6px;
+      background-color: #efefe6;
+      min-height: 70px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 2px 2px 2px;
+    }
+
+    .list-item .words {
+      font-weight: normal;
+    }
+
+    #word-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-gap: 8px;
+    }
+
+    #word-grid .grid-cell {
+      text-transform: uppercase;
+      border-radius: 6px;
+      background-color: #fff;
+      font-weight: bold;
+      min-height: 70px;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      cursor: pointer;
+      box-shadow: 2px 2px 2px;
+      transition: all 0.1s linear;
+    }
+
+    #word-grid .grid-cell.selected {      
+      background: #5a594e;
+      color: #fff;
+    }
+
+    #word-grid .grid-cell.invalid {
+      background: #7f7f7f;
+    }
+
+    .button-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .button {
+      background-color: #fff;
+      border: black solid 1px;
+      border-radius: 1.5em;
+      height: 3em;
+      font-weight: 600;
+      width: fit-content;
+      display: flex;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      cursor: pointer;
+    }
+
+    .button.down {
+      background-color: #e2e2e2;
+    }
+
+    .button.submit {
+      color: #7f7f7f;
+      border-color: #7f7f7f;
+    }
+
+    .button.submit.active {
+      color: #fff;
+      background-color: #000;
+    }
+
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #000;
+      color: #fff;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 14px;
+      opacity: 0%;
+      transition: all 0.2s linear;
+    }
+
+    #message.show {
+      opacity: 100%;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0);
+      visibility: hidden;
+    }
+
+    #overlay.show {
+      background-color: rgba(0, 0, 0, 0.8);
+      visibility: visible;
+    }
+
+    #overlay .container {
+      height: 100%;
+    }
+
+    #picture {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      height: 100%;
+    }
+
+    #picture img {
+      border-radius: 10px;  
+      max-width: 100%; 
+      max-height: calc(100% - 150px);
+      object-fit: contain;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class='container p-4'>
+  <h3 class='display-5'>Holiday Connections</h3>
+  <small class='text-muted'>From the Peck Borland family</small>
+  <hr />
+  <div class='text-center mb-4'>
+    Create four groups of four!
+  </div>
+  <div id='solved-list'></div>
+  <div id='word-grid'></div>
+  <div id='toolbar' class='button-toolbar mt-4'>    
+    <div id='refresh-button' class='button'>Refresh</div>
+    <div id='shuffle-button' class='button'>Shuffle</div>
+    <div id='deselect-button' class='button'>Deselect All</div>
+    <div id='submit-button' class='button submit'>Submit</div>
+  </div>
+</div>
+<div id='message'></div>
+<div id='overlay'>
+  <div class='container px-4'>
+    <div id='picture' class='mt-4'>
+      <div id='picture-solved-list'></div>
+      <img />
+      <div id='image-buttons' class='button-toolbar'>
+        <div id='next-button' class='button'>Next</div>
+        <div id='close-button' class='button'>Close</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type='module'>
+  import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
+  const colors = [
+    '#f9df6d',
+    '#a0c351',
+    '#b0c4ef',
+    '#ba81c5'
+  ];
+
+  // Utility functions
+  const filterGroups = groups => {
+    const copy = JSON.parse(JSON.stringify(groups));
+    const filtered = d3.shuffle(copy).slice(0, 4);
+    filtered.forEach(group => group.words = d3.shuffle(group.words).slice(0, 4));
+
+    return filtered;
+  };
+
+  const getWords = groups => d3.merge(groups.map(group => group.words));
+
+  const drawSolved = (selection, groups, color = null) => {
+    const item = selection.selectAll('.list-item')
+      .data(groups)
+      .join('div')
+      .attr('class', 'list-item')      
+      .style('background-color', (d, i) => color ? color : colors[i])
+      .text(d => d.category)
+      .append('div')
+      .attr('class', 'words')
+      .text(d => d.words.join(', '));
+  };
+
+  const drawGrid = words => {
+    d3.select('#word-grid').selectAll('.grid-cell')
+      .data(d3.shuffle(words))
+      .join('div')
+      .attr('class', 'grid-cell')
+      .text(d => d)
+      .classed('selected', d => selected.includes(d))
+      .on('mousedown', function(event, d) {      
+        const wordSelected = selected.includes(d);
+
+        if (!wordSelected && selected.length < 4) {
+          d3.select(this)
+            .classed('selected', true);
+
+          selected.push(d);
+        }
+        else if (wordSelected) {
+          d3.select(this)
+            .classed('selected', false);
+
+          selected.splice(selected.indexOf(d), 1);
+        }
+
+        // Update submit button
+        d3.select('.submit')
+          .classed('active', selected.length === 4);
+      });
+  };
+
+  // Get data
+  const groupData = await d3.json('groups.json');
+
+  // Filter data
+  let allGroups = filterGroups(groupData);
+  let groups = allGroups.slice();
+  let solved = [];
+
+  // Word variables
+  let words = getWords(groups);
+  let selected = [];
+
+  drawGrid(words);
+    
+  // Buttons
+  d3.select('#refresh-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      // Filter data
+      allGroups = filterGroups(groupData);
+      groups = allGroups.slice();
+      solved = [];
+
+      // Word variables
+      words = getWords(groups);
+      selected = [];
+
+      drawSolved(d3.select('#solved-list'), solved);
+      drawGrid(words);
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
+    });
+
+  d3.select('#shuffle-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      drawGrid(words);
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
+    });
+
+  d3.select('#deselect-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      d3.selectAll('.grid-cell')
+        .classed('selected', false);
+
+      selected = [];
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
+    });
+
+  d3.select('#submit-button')
+    .on('mousedown', function () {
+      let maxCount = 0;
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i];
+        const count = group.words.reduce((count, word) => count + (selected.includes(word) ? 1 : 0), 0);
+
+        maxCount = Math.max(maxCount, count);          
+
+        if (maxCount === 4) {
+          solved.push(group);
+          groups.splice(i, 1);
+          break;
+        }
+      }
+
+      if (maxCount === 4) {
+        const group = solved[solved.length - 1];
+        let imageIndex = 0;
+
+        drawSolved(d3.select('#picture-solved-list'), [group], colors[solved.length - 1]);
+        
+        d3.select('#picture img')
+          .attr('src', `/images/${ group.images[imageIndex] }`)
+          .on('load', function() {
+            d3.select('#overlay')
+              .classed('show', true);
+          });
+
+        d3.select('#next-button')
+          .on('mousedown', function () {
+            d3.select(this)
+              .classed('down', true);
+
+            imageIndex = (imageIndex + 1) % (group.images.length);
+            d3.select('#picture img')
+              .attr('src', `/images/${ group.images[imageIndex] }`);
+          })
+          .on('mouseup', function () {
+            d3.select(this)
+              .classed('down', false);
+          });
+
+        d3.select('#close-button')
+          .on('mousedown', function () {
+            d3.select(this)
+              .classed('down', true);
+
+            d3.select('#overlay')
+              .classed('show', false);
+
+            d3.select('.submit')
+              .classed('active', false);
+
+            selected = [];
+            words = getWords(groups);
+
+            drawSolved(d3.select('#solved-list'), solved);
+            drawGrid(words);
+          })
+          .on('mouseup', function () {
+            d3.select(this)
+              .classed('down', false);
+          });        
+      }
+      else {
+        if (maxCount === 3) {
+          d3.select('#message')
+            .classed('show', true)
+            .text('One away...');
+
+          setTimeout(() => {
+            d3.select('#message')
+              .classed('show', false)
+          }, 2000);
+        }
+
+        d3.selectAll('.selected')
+          .classed('invalid', true);
+
+        setTimeout(() => {
+          d3.selectAll('.selected')
+            .classed('invalid', false);
+        }, 2000);
+      }
+    })
+    .on('mouseup', function () {
+    });
+
+    d3.select('#picture')
+      .on('mousedown', function() {
+        d3.select(this)
+          .classed('show', false);
+      });
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
