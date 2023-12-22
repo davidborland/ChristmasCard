@@ -202,10 +202,10 @@
       transform: translate(-50%, 0);
     }
 
-    #menu {
-      position: absolute;
-      top: 10px;
-      right: 10px;
+    #subheader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
   </style>
@@ -214,22 +214,23 @@
 <body>
 
 <div class='container p-2' style='position: relative;'>
-  <div id='menu' class="dropdown">
-    <button class="btn btn-outline-dark" type="button" id="dropdownMenuButton" data-toggle="dropdown">      
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-      </svg>
-    </button>
-    <div class="dropdown-menu dropdown-menu-right">
-      <h6 class="dropdown-header">Cards from previous years</h6>
-      <a class="dropdown-item" href="https://davidborland.github.io/ChristmasCard/2020/">2020</a>
-      <a class="dropdown-item" href="https://davidborland.github.io/ChristmasCard/2021/">2021</a>
-      <a class="dropdown-item" href="https://davidborland.github.io/ChristmasCard/2022/">2022</a>
+  <h3 class='display-5'>Holiday Hodgepodge 2023</h3>  
+  <div id='subheader'>
+    <small class='text-muted'>From the Peck-Borland family</small>
+    <div id='menu' class="dropdown">
+      <button type="button" data-toggle="dropdown" style='background-color: rgba(0, 0, 0, 0); border: none;'>  
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+        </svg>
+      </button>
+      <div class="dropdown-menu dropdown-menu-right">
+        <h6 class="dropdown-header">Cards from previous years</h6>
+        <a class="dropdown-item" href="https://davidborland.github.io/ChristmasCard/2020/">2020</a>
+        <a class="dropdown-item" href="https://davidborland.github.io/ChristmasCard/2021/">2021</a>
+        <a class="dropdown-item" href="https://davidborland.github.io/ChristmasCard/2022/">2022</a>
+      </div>
     </div>
   </div>
-
-  <h3 class='display-5'>Holiday Hodgepodge 2023</h3>  
-  <small class='text-muted'>From the Peck-Borland family</small>
   <hr />
   <div class='text-center mb-4'>
     Create four groups of four!
@@ -262,7 +263,7 @@
   </div>
 </div>
 
-<div id='card-overlay' class="show">
+<div id='card-overlay'>
   <img src='images/family_01.jpg' />
   <div id='again-button' class='button'>
     Congratulations!&nbsp;Try&nbsp;Again?</div>
