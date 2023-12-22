@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
   <meta name='viewport' content='width=device-width, initial-scale=1'>
-  <title>Happy Holidays!</title>
+  <title>Holiday Gathering</title>
   <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN' crossorigin='anonymous'>
   <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js' integrity='sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' crossorigin='anonymous'></script>
 
@@ -154,8 +154,36 @@
     #picture img {
       border-radius: 10px;  
       max-width: 100%; 
-      max-height: calc(100% - 150px);
+      max-height: calc(100% - 190px);
       object-fit: contain;
+    }
+
+    #card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0);  
+      visibility: hidden;    
+    }
+
+    #card-overlay.show {
+      background-color: rgba(0, 0, 0, 0.9);
+      visibility: visible;
+    }
+
+    #card-overlay img {     
+      max-width: 100%; 
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    #again-button {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translate(-50%, 0);
     }
 
   </style>
@@ -164,7 +192,7 @@
 <body>
 
 <div class='container p-2'>
-  <h3 class='display-5'>Holiday Connections 2023</h3>
+  <h3 class='display-5'>Holiday Gathering 2023</h3>
   <small class='text-muted'>From the Peck-Borland family</small>
   <hr />
   <div class='text-center mb-4'>
@@ -179,9 +207,11 @@
     <div id='submit-button' class='button submit'>Submit</div>
   </div>
 </div>
+
 <div id='message'></div>
+
 <div id='overlay'>
-  <div class='container px-4'>
+  <div class='container px-2'>
     <div id='picture' class='mt-4'>
       <div id='picture-solved-list'></div>
       <img />
@@ -193,12 +223,17 @@
   </div>
 </div>
 
+<div id='card-overlay'>
+  <img src='images/card.jpg' />
+  <div id='again-button' class='button'>Congratulations! Try Again?</div>
+</div>
+
 <div id='instructions' class='modal' tabindex='-1'> 
   <div class='modal-dialog'> 
     <div class='modal-content'> 
       <div class='modal-header'> 
         <h5 class='modal-title'> 
-          How to play Holiday Connections
+          How to play Holiday Gathering
         </h5> 
       </div> 
       <div class='modal-body'> 
@@ -214,7 +249,7 @@
           Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!
         </p>
         <p>
-          You can tap the 'Refresh' button to get a different set of groups and words. There are five groups in all.
+          You can tap the 'Refresh' button to get a different set of groups and words. There are six groups in all.
         </p>
         <hr />
         <p>
@@ -305,7 +340,7 @@
   drawGrid(words);
     
   // Buttons
-  d3.select('#refresh-button')
+  d3.select('#refresh-button, #again-button')
     .on('mousedown', function () {
       d3.select(this)
         .classed('down', true);
@@ -413,6 +448,11 @@
 
             drawSolved(d3.select('#solved-list'), solved);
             drawGrid(words);
+
+            if (solved.length === 4) {
+              d3.select('#card-overlay')
+                .classed('show', true);
+            }
           })
           .on('mouseup', function () {
             d3.select(this)
@@ -439,15 +479,7 @@
             .classed('invalid', false);
         }, 2000);
       }
-    })
-    .on('mouseup', function () {
     });
-
-    d3.select('#picture')
-      .on('mousedown', function() {
-        d3.select(this)
-          .classed('show', false);
-      });
 
 </script>
 

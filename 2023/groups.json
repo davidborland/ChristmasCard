@@ -2,21 +2,19 @@
   {
     "category": "soccer",
     "words": [
-      "antelope",
       "coach",
       "academy",
       "goal",
-      "dribble"
+      "dribble",
+      "tackle"
     ],
     "images": [
-      "ewen_soccer_01.jpg",
       "ewen_soccer_02.jpg"
     ]
   },
   {
     "category": "taekwondo",
     "words": [
-      "medal",
       "kick",
       "punch",
       "break",
@@ -34,7 +32,7 @@
       "acadia",
       "joshua",
       "hike",
-      "mount",
+      "waterfall",
       "maine",
       "california"
     ],
@@ -67,7 +65,8 @@
       "angus_02.jpg",
       "angus_03.jpg",
       "angus_04.jpg",
-      "angus_06.jpg"
+      "angus_06.jpg",
+      "angus_07.jpg"
     ]
   },
   {
@@ -98,7 +97,9 @@
       "cookie"
     ],
     "images": [
-      "brownie_01.jpg"
+      "brownie_02.jpg",
+      "chess_01.jpg",
+      "treble_01.jpg"
     ]
   }
 ]
