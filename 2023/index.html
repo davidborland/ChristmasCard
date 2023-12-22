@@ -10,6 +10,9 @@
   <style>
     body {
       height: 100%;
+      background-image: url('https://hips.hearstapps.com/clv.h-cdn.co/assets/16/49/4000x2661/gettyimages-185325220.jpg?resize=980:*');
+      background-size: 100vw 100vh;
+      background-repeat: no-repeat;
     }
 
     #solved-list {
@@ -29,8 +32,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      cursor: pointer;
       user-select: none;
+      box-shadow: 2px 2px 2px;
       transition: all 0.1s linear;
     }
 
@@ -47,7 +50,7 @@
     #word-grid .grid-cell {
       text-transform: uppercase;
       border-radius: 6px;
-      background-color: #efefe6;
+      background-color: #fff;
       font-weight: bold;
       min-height: 70px;
       display: grid;
@@ -55,6 +58,7 @@
       justify-items: center;
       cursor: pointer;
       user-select: none;
+      box-shadow: 2px 2px 2px;
       transition: all 0.1s linear;
     }
 
@@ -75,6 +79,7 @@
     }
 
     .button {
+      background-color: #fff;
       border: black solid 1px;
       border-radius: 1.5em;
       height: 3em;
@@ -156,10 +161,6 @@
       object-fit: contain;
     }
 
-    #image-buttons .button {
-      background-color: #fff;
-    }
-
   </style>
 </head>
 
@@ -185,7 +186,7 @@
   <div class='container px-4'>
     <div id='picture'>
       <div id='picture-solved-list'></div>
-      <img src='/images/IMG_20220708_093329110_small.jpg' />
+      <img />
       <div id='image-buttons' class='button-toolbar'>
         <div id='next-button' class='button'>Next</div>
         <div id='close-button' class='button'>Close</div>
@@ -215,12 +216,12 @@
 
   const getWords = groups => d3.merge(groups.map(group => group.words));
 
-  const drawSolved = (selection, groups) => {
+  const drawSolved = (selection, groups, color = null) => {
     const item = selection.selectAll('.list-item')
       .data(groups)
       .join('div')
       .attr('class', 'list-item')      
-      .style('background-color', (d, i) => colors[i])
+      .style('background-color', (d, i) => color ? color : colors[i])
       .text(d => d.category)
       .append('div')
       .attr('class', 'words')
@@ -316,17 +317,48 @@
 
       if (maxCount === 4) {
         const group = solved[solved.length - 1];
+        let imageIndex = 0;
 
-        drawSolved(d3.select('#picture-solved-list'), [group]);
+        drawSolved(d3.select('#picture-solved-list'), [group], colors[solved.length - 1]);
+        
+        d3.select('#picture img')
+              .attr('src', `/images/${ group.images[imageIndex] }`);
 
         d3.select('#overlay')
           .classed('show', true);
 
-        selected = [];
-        words = getWords(groups);
+        d3.select('#next-button')
+          .on('mousedown', function () {
+            d3.select(this)
+              .classed('down', true);
 
-        drawSolved(d3.select('#solved-list'), solved);
-        drawGrid(words);
+            imageIndex = (imageIndex + 1) % (group.images.length);
+            d3.select('#picture img')
+              .attr('src', `/images/${ group.images[imageIndex] }`);
+          })
+          .on('mouseup', function () {
+            d3.select(this)
+              .classed('down', false);
+          });
+
+        d3.select('#close-button')
+          .on('mousedown', function () {
+            d3.select(this)
+              .classed('down', true);
+
+            d3.select('#overlay')
+              .classed('show', false);
+
+            selected = [];
+            words = getWords(groups);
+
+            drawSolved(d3.select('#solved-list'), solved);
+            drawGrid(words);
+          })
+          .on('mouseup', function () {
+            d3.select(this)
+              .classed('down', false);
+          });        
       }
       else {
         if (maxCount === 3) {
