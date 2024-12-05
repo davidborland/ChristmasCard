@@ -9,9 +9,6 @@
   <style>
     body {
       height: 100%;
-      background-image: url('images/background.jpg');
-      background-size: 100vw 100vh;
-      background-repeat: no-repeat;
       user-select: none;
       overflow: hidden;
     }
@@ -20,6 +17,42 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .button-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .button {
+      background-color: #fff;
+      border: black solid 1px;
+      border-radius: 1.5em;
+      height: 3em;
+      font-weight: 600;
+      width: fit-content;
+      display: flex;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      cursor: pointer;
+    }
+
+    .button.down {
+      background-color: #e2e2e2;
+    }
+
+    .button.submit {
+      color: #7f7f7f;
+      border-color: #7f7f7f;
+    }
+
+    .button.submit.active {
+      color: #fff;
+      background-color: #000;
     }
 
   </style>
@@ -55,38 +88,18 @@
     </div>
   </div>
   <hr />
-  <div class='text-center mb-4'>
-    TODAY'S THEME:
-    Our year...
+  <div id='theme' class="card">
+    <div class="card-header text-center text-uppercase fw-bold">
+      Today's theme
+    </div>
+    <div class="card-body fw-bolder fs-4">
+      Our year...
+    </div>
   </div>
   <div id='word-grid'></div>
   <div id='toolbar' class='button-toolbar mt-4'>    
     <div id='hint-button' class='button'>Hint</div>
   </div>
-</div>
-
-<div id='message'></div>
-
-<div id='overlay'>
-  <div class='container px-2'>
-    <div id='picture' class='mt-4'>
-      <div id='picture-solved-list'></div>
-      <img />
-      <video controls preload autoplay>
-        <source type='video/mp4' />
-      </video>
-      <div id='image-buttons' class='button-toolbar'>
-        <div id='next-button' class='button'>Next</div>
-        <div id='close-button' class='button'>Close</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id='card-overlay'>
-  <img src='images/family_01.jpg' />
-  <div id='again-button' class='button'>
-    Congratulations!&nbsp;Try&nbsp;Again?</div>
 </div>
 
 <div id='instructions' class='modal' tabindex='-1'> 
@@ -138,283 +151,34 @@
 <script type='module'>
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
-  const colors = [
-    '#679576',
-    '#d78685',
-    '#bcc6cc',
-    '#e0be52'
-  ];
+  const strandColor = '#679576';    // green
+  const spangramColor = '#d78685';  // red
+  const guessColor = '#bcc6cc';     // bluegrey
 
-  // Utility functions
-  const filterGroups = groups => {
-    const copy = JSON.parse(JSON.stringify(groups));
-    const filtered = d3.shuffle(copy).slice(0, 4);
-    filtered.forEach(group => group.words = d3.shuffle(group.words).slice(0, 4));
-
-    return filtered;
-  };
-
-  const getWords = groups => d3.merge(groups.map(group => group.words));
-
-  const drawSolved = (selection, groups, color = null) => {
-    const item = selection.selectAll('.list-item')
-      .data(groups)
-      .join('div')
-      .attr('class', 'list-item')      
-      .style('background-color', (d, i) => color ? color : colors[i])
-      .text(d => d.category)
-      .append('div')
-      .attr('class', 'words')
-      .text(d => d.words.join(', '));
-  };
-
-  const drawGrid = words => {
-    d3.select('#word-grid').selectAll('.grid-cell')
-      .data(d3.shuffle(words))
-      .join('div')
-      .attr('class', 'grid-cell')
-      .text(d => d)
-      .classed('selected', d => selected.includes(d))
-      .on('mousedown', function(event, d) {      
-        const wordSelected = selected.includes(d);
-
-        if (!wordSelected && selected.length < 4) {
-          d3.select(this)
-            .classed('selected', true);
-
-          selected.push(d);
-        }
-        else if (wordSelected) {
-          d3.select(this)
-            .classed('selected', false);
-
-          selected.splice(selected.indexOf(d), 1);
-        }
-
-        // Update submit button
-        d3.select('.submit')
-          .classed('active', selected.length === 4);
-      });
-  };
+  d3.select('#theme').select('.card-header')
+    .style('background-color', strandColor)
 
   const instructions = new bootstrap.Modal(document.getElementById('instructions'));
   d3.select('#instructions')
     .on('mousedown', () => instructions.hide());
   instructions.show();
 
-
-  // Get data
-  const groupData = await d3.json('groups.json');
-
-  // Filter data
-  let allGroups = filterGroups(groupData);
-  let groups = allGroups.slice();
-  let solved = [];
-
-  // Word variables
-  let words = getWords(groups);
-  let selected = [];
-
-  drawGrid(words);
-    
   // Buttons
   d3.select('#info-button')
     .on('mousedown', function () {
       instructions.show();
     });
 
-  d3.selectAll('#refresh-button, #again-button')
+  d3.select('#hint-button')
     .on('mousedown', function () {
       d3.select(this)
         .classed('down', true);
 
-      d3.select('#card-overlay')
-        .classed('show', false);
-
-      // Filter data
-      allGroups = filterGroups(groupData);
-      groups = allGroups.slice();
-      solved = [];
-
-      // Word variables
-      words = getWords(groups);
-      selected = [];
-
-      drawSolved(d3.select('#solved-list'), solved);
-      drawGrid(words);
+      // Show hint
     })
     .on('mouseup', function () {
       d3.select(this)
         .classed('down', false);
-    });
-
-  d3.select('#shuffle-button')
-    .on('mousedown', function () {
-      d3.select(this)
-        .classed('down', true);
-
-      drawGrid(words);
-    })
-    .on('mouseup', function () {
-      d3.select(this)
-        .classed('down', false);
-    });
-
-  d3.select('#deselect-button')
-    .on('mousedown', function () {
-      d3.select(this)
-        .classed('down', true);
-
-      d3.selectAll('.grid-cell')
-        .classed('selected', false);
-
-      selected = [];
-    })
-    .on('mouseup', function () {
-      d3.select(this)
-        .classed('down', false);
-    });
-
-  d3.select('#submit-button')
-    .on('mousedown', function () {
-      let maxCount = 0;
-      for (let i = 0; i < groups.length; i++) {
-        const group = groups[i];
-        const count = group.words.reduce((count, word) => count + (selected.includes(word) ? 1 : 0), 0);
-
-        maxCount = Math.max(maxCount, count);          
-
-        if (maxCount === 4) {
-          solved.push(group);
-          groups.splice(i, 1);
-          break;
-        }
-      }
-
-      if (maxCount === 4) {
-        const group = solved[solved.length - 1];
-        let imageIndex = 0;
-
-        drawSolved(d3.select('#picture-solved-list'), [group], colors[solved.length - 1]);
-
-        const image = group.images[imageIndex];
-
-        if (image.includes('.mp4')) {
-          d3.select('#picture img')
-            .classed('show', false);
-        
-          d3.select('#picture video')
-            .classed('show', true)
-            .attr('src', `images/${ image }`)
-            .on('oncanplay', function() {
-              d3.select('#overlay')
-                .classed('show', true);
-            });
-        }
-        else {
-          d3.select('#picture video')
-            .classed('show', false);
-        
-          d3.select('#picture img')
-            .classed('show', true)
-            .attr('src', `images/${ image }`)
-            .on('load', function() {
-              d3.select('#overlay')
-                .classed('show', true);
-            });
-        }
-
-        d3.select('#next-button')
-          .on('mousedown', function () {
-            d3.select(this)
-              .classed('down', true);
-
-            imageIndex = (imageIndex + 1) % (group.images.length);
-
-            const image = group.images[imageIndex];
-            
-            if (image.includes('.mp4')) {
-              d3.select('#picture img')
-                .classed('show', false);
-            
-              d3.select('#picture video')
-                .classed('show', true)
-                .attr('src', `images/${ image }`)
-                .classed('show', true)
-                .on('oncanplay', function() {
-                  d3.select('#overlay')
-                    .classed('show', true);
-                });
-            }
-            else {
-              d3.select('#picture video')
-                .classed('show', false);
-            
-              d3.select('#picture img')
-                .classed('show', true)
-                .attr('src', `images/${ image }`)
-                .on('load', function() {
-                  d3.select('#overlay')
-                    .classed('show', true);
-                });
-            }
-          })
-          .on('mouseup', function () {
-            d3.select(this)
-              .classed('down', false);
-          });
-
-        d3.select('#close-button')
-          .on('mousedown', function () {
-            d3.select(this)
-              .classed('down', true);
-
-            d3.select('#overlay')
-              .classed('show', false);
-
-            d3.select('.submit')
-              .classed('active', false);
-
-            const video = d3.select('#picture video').node();
-            video.pause();
-            video.currentTime = 0;
-
-            selected = [];
-            words = getWords(groups);
-
-            drawSolved(d3.select('#solved-list'), solved);
-            drawGrid(words);
-
-            if (solved.length === 4) {
-              d3.select('#card-overlay')
-                .classed('show', true);
-            }
-          })
-          .on('mouseup', function () {
-            d3.select(this)
-              .classed('down', false);
-          });        
-      }
-      else {
-        if (maxCount === 3) {
-          d3.select('#message')
-            .classed('show', true)
-            .text('One away...');
-
-          setTimeout(() => {
-            d3.select('#message')
-              .classed('show', false)
-          }, 2000);
-        }
-
-        d3.selectAll('.selected')
-          .classed('invalid', true);
-
-        setTimeout(() => {
-          d3.selectAll('.selected')
-            .classed('invalid', false);
-        }, 2000);
-      }
     });
 
 </script>
