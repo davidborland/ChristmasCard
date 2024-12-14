@@ -1,15 +1,7 @@
-{
-  "letters": [
-    "back",
-    "head",
-    "neck",
-    "poop"
-  ],
-  "words": [
-    "1111",
-    "2222",
-    "3333",
-    "4444"
-  ]
-}
+[
+  "b-a1 a-a2 c-a2 k-a4",
+  "h-b1 e-b2 a-b3 d-b4",
+  "n-c1 e-c2 c-c3 k-c4",
+  "p-d1 o-d2 o-d3 p-d4"
+]
 

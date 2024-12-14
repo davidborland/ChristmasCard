@@ -19,6 +19,23 @@
       align-items: center;
     }
 
+    #word-grid {
+      display: grid;
+      grid-gap: 8px;
+    }
+
+    #word-grid .grid-cell {
+      text-transform: uppercase;
+      border-radius: 6px;
+      background-color: #fff;
+      min-height: 70px;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      cursor: pointer;
+      transition: all 0.1s linear;
+    }
+
     .button-toolbar {
       display: flex;
       align-items: center;
@@ -155,6 +172,15 @@
   const spangramColor = '#d78685';  // red
   const guessColor = '#bcc6cc';     // bluegrey
 
+  // Utility functions
+  const drawGrid = words => {
+    d3.select('#word-grid').selectAll('.grid-cell')
+      .data(letters)
+      .join('div')
+      .attr('class', 'grid-cell')
+      .text(d => d.value)
+  };
+
   d3.select('#theme').select('.card-header')
     .style('background-color', strandColor)
 
@@ -162,6 +188,63 @@
   d3.select('#instructions')
     .on('mousedown', () => instructions.hide());
   instructions.show();
+
+  // Get data
+  const [words, letters, numColumns] = await d3.json('grid.json').then(grid => {
+    const words = [];
+    const letters = [];
+
+    grid.forEach((row, i) => {
+      row.split(' ').forEach((s, j) => {
+        // Get character and word info from string
+        const [char, info] = s.split('-');
+        const [id, pos] = info.split('');
+
+        // Get the word
+        let word = words.find(word => word.id === id);
+        if (!word) {
+          word = { 
+            id: id,
+            letters: []
+          };
+
+          words.push(word);
+        }
+
+
+        // Add the letter
+        const letter = {
+          value: char,
+          word: word,
+          pos: pos,
+          i: i,
+          j: j
+        };
+
+        letters.push(letter);        
+        word.letters.push(letter);
+      });
+    });
+
+    words.forEach(word => word.letters.sort((a, b) => d3.ascending(a.pos, b.pos)));
+
+    const numColumns = d3.max(letters, letter => letter.j) + 1;
+
+    return [words, letters, numColumns];
+  });
+
+  console.log(words);
+  console.log(letters);
+  console.log(numColumns);
+
+  // Grid
+
+  // XXX: Not sure how well a css grid will work with links. Might be better to use d3 ordinal scales?
+
+  d3.select('#word-grid')
+    .style('grid-template-columns', `repeat(${ numColumns }, 1fr`);
+
+  drawGrid(words);
 
   // Buttons
   d3.select('#info-button')
