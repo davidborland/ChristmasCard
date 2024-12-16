@@ -19,9 +19,21 @@
       align-items: center;
     }
 
+    #grid-wrapper {
+      position: relative;
+    }
+
+    #word-svg {  
+      position: absolute;
+      top: 0;
+      z-index: -100;
+    }
+
     #word-grid {
       display: grid;
       grid-gap: 8px;
+      background-color: transparent;
+      opacity: 0.5;
     }
 
     #word-grid .grid-cell {
@@ -113,7 +125,10 @@
       Our year...
     </div>
   </div>
-  <div id='word-grid'></div>
+  <div id='grid-wrapper'>  
+    <svg id='word-svg'></svg>  
+    <div id='word-grid'></div>
+  </div>
   <div id='toolbar' class='button-toolbar mt-4'>    
     <div id='hint-button' class='button'>Hint</div>
   </div>
@@ -172,12 +187,41 @@
   const spangramColor = '#d78685';  // red
   const guessColor = '#bcc6cc';     // bluegrey
 
-  // Utility functions
   const drawGrid = words => {
     d3.select('#word-grid').selectAll('.grid-cell')
       .data(letters)
       .join('div')
       .attr('class', 'grid-cell')
+      .text(d => d.value)
+
+    const width = parseInt(d3.select('#word-grid').style('width'), 10)
+    const height = parseInt(d3.select('#word-grid').style('height'), 10)
+
+    console.log(width, height);
+
+    const xScale = d3.scalePoint()
+      .domain(d3.range(numColumns))
+      .range([0, width])
+      .padding(0.5)
+
+    const yScale = d3.scalePoint()
+      .domain(d3.range(numColumns))
+      .range([0, height])
+      .padding(0.5)
+
+    const g = d3.select('#word-svg')
+      .attr('width', width)
+      .attr('height', height)
+      .selectAll('g')
+      .data(letters)
+      .join('g')
+      .attr('transform', d => `translate(${ xScale(d.i) },${ yScale(d.j) })`);
+
+    g.append('circle')
+      .attr('r', 20)
+      .style('fill', 'red');
+
+    g.append('text')
       .text(d => d.value)
   };
 
