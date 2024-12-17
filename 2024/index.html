@@ -56,7 +56,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 20px;
     }
 
     .button {
@@ -115,6 +115,11 @@
       height: 100%;
     }
 
+    #picture-word {
+      border-radius: .5em;
+      background-color: #fff;
+    }
+
     #picture img {
       border-radius: 10px;  
       max-width: 100%; 
@@ -169,7 +174,7 @@
   </div>
   <hr />
   <div class='row'>
-    <div class='col-md-6'>
+    <div class='col-md-6 align-self-center'>
       <div id='theme' class="card">
         <div class='card-header text-center text-uppercase fw-bold'>
           Today's theme
@@ -180,6 +185,7 @@
       </div>
     </div>
     <div class='col-md-6'>
+      <div id='current-word' class='text-center text-uppercase fw-bold fs-4'></div>
       <div id='grid-wrapper'>  
         <div id='word-grid'></div>
         <svg id='word-svg'>
@@ -191,11 +197,13 @@
         </svg>  
       </div>
     </div>
-  </div>
-  <div id='toolbar' class='button-toolbar mt-4'>    
-    <div id='hint-button' class='button'>Hint</div>
-    <div class='fs-4'>
-      <span id='num-found' class='fw-bold'></span> of <span id='num-total' class='fw-bold'></span> theme words found.
+    <div class='col-md-6 align-self-center'>      
+      <div id='toolbar' class='button-toolbar mt-4'>    
+        <div id='hint-button' class='button'>Hint</div>
+        <div class='fs-4'>
+          <span id='num-found' class='fw-bold'></span> of <span id='num-total' class='fw-bold'></span> theme words found.
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -203,7 +211,7 @@
 <div id='overlay'>
   <div class='container px-2'>
     <div id='picture' class='mt-4'>
-      <div id='picture-solved-list'></div>
+      <div id='picture-word' class='text-center text-uppercase fw-bold fs-3'></div>
       <img />
       <video controls preload autoplay>
         <source type='video/mp4' />
@@ -271,10 +279,16 @@
   const strandColor = '#679576';    // green
   const spangramColor = '#d78685';  // red
 
+  const wordColor = word => word.spangram ? spangramColor : strandColor;
+
   const showImages = word => {
     let imageIndex = 0;
 
     const image = word.images[imageIndex];
+
+    d3.select('#picture-word')
+      .style('color', wordColor(word))
+      .text(word.letters.map(letter => letter.value).join(''));
 
     if (image.includes('.mp4')) {
       d3.select('#picture img')
@@ -353,23 +367,11 @@
         d3.select('#overlay')
           .classed('show', false);
 
-        d3.select('.submit')
-          .classed('active', false);
-
         const video = d3.select('#picture video').node();
         video.pause();
         video.currentTime = 0;
 
-        selected = [];
-        words = getWords(groups);
-
-        drawSolved(d3.select('#solved-list'), solved);
         drawGrid(words);
-
-        if (solved.length === 4) {
-          d3.select('#card-overlay')
-            .classed('show', true);
-        }
       })
       .on('mouseup', function () {
         d3.select(this)
@@ -494,7 +496,7 @@
     nodes.select('circle')
       .attr('r', radius)
       .style('visibility', d => guess.includes(d) || d.word.found ? null : 'hidden')
-      .style('fill', d => guess.includes(d) ? guessColor : d.word.spangram ? spangramColor : strandColor);
+      .style('fill', d => guess.includes(d) ? guessColor : wordColor(d.word));
 
     nodes.select('text')
       .text(d => d.value.toUpperCase());
@@ -526,7 +528,7 @@
         }  
       )
       .style('stroke-width', radius / 2)
-      .style('stroke', d => d.spangram ? spangramColor : strandColor)
+      .style('stroke', wordColor)
       .style('visibility', d => d.found ? null : 'hidden')
       .style('cursor', 'pointer');
 
@@ -545,6 +547,11 @@
 
     d3.select('#num-total')
       .text(words.length);
+
+    // Update current word
+    d3.select('#current-word')
+      .style('visibility', guess.length > 0 ? null : 'hidden')
+      .text(guess.length > 0 ? guess.map(letter => letter.value).join('') : 'nothing');
   };
 
   d3.select('#theme').select('.card-header')
