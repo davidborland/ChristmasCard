@@ -37,11 +37,15 @@
       min-height: 70px;
     }
 
-    #word-svg .letter-group {
+    #word-svg .node {
       cursor: pointer;
     }
 
-    #word-svg .letter-group text {
+    #word-svg .link {
+      fill: none;
+    }
+
+    #word-svg .node text {
       text-anchor: middle;
       dominant-baseline: middle;
       font-weight: bold;
@@ -123,7 +127,7 @@
         <div class='card-header text-center text-uppercase fw-bold'>
           Today's theme
         </div>
-        <div class='card-body fw-bolder fs-4'>
+        <div class='card-body fw-bolder fs-4 text-center'>
           Our year...
         </div>
       </div>
@@ -131,7 +135,13 @@
     <div class='col-md-6'>
       <div id='grid-wrapper'>  
         <div id='word-grid'></div>
-        <svg id='word-svg'></svg>  
+        <svg id='word-svg'>
+          <g class='links'></g>
+          <g class='guess-links'>
+            <path class='link'></path>
+          </g>
+          <g class='nodes'></g>
+        </svg>  
       </div>
     </div>
   </div>
@@ -189,6 +199,8 @@
 <script type='module'>
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
+  let guess = [];
+
   const guessColor = '#bcc6cc';     // bluegrey
   const strandColor = '#679576';    // green
   const spangramColor = '#d78685';  // red
@@ -196,9 +208,9 @@
   const colorScale = d3.scaleOrdinal()
     .domain(['guessing', 'found', 'spangram'])
     .range([guessColor, strandColor, spangramColor])
-    .unknown('#fff');
+    .unknown('#f00');
 
-  const drawGrid = words => {
+  const drawGrid = () => {
     // Reserve space using css grid
     d3.select('#word-grid').selectAll('.grid-cell')
       .data(letters)
@@ -209,6 +221,8 @@
     // Get size
     const width = parseInt(d3.select('#word-grid').style('width'), 10)
     const height = parseInt(d3.select('#word-grid').style('height'), 10)
+
+    const radius = 20;
 
     // Draw using svg
     const xScale = d3.scalePoint()
@@ -221,26 +235,89 @@
       .range([0, height])
       .padding(0.5)
 
-    const g = d3.select('#word-svg')
+    // Nodes
+    const nodes = d3.select('#word-svg')
       .attr('width', width)
       .attr('height', height)
-      .selectAll('.letter-group')
+      .select('.nodes').selectAll('.node')
       .data(letters)
-      .join('g')
-      .attr('class', 'letter-group')
-      .attr('transform', d => `translate(${ xScale(d.j) },${ yScale(d.i) })`)
-      .on('click', (evt, d) => {
-        d.state = 'guessing';
-        drawGrid();
-      });
+      .join(
+        enter => {
+          const g = enter.append('g')
+            .attr('class', 'node')              
+            .on('click', (evt, d) => {
+              if (guess.length === 0) {
+                guess.push(d);
+                d.state = 'guessing';
+              }
+              else {
+                const i = guess.indexOf(d);
 
-    g.append('circle')
-      .attr('r', 20)
-      .style('fill', d => colorScale(d.state));
+                if (i === -1) {
+                  // XXX: NEED TO CHECK INDECES
+                  guess.push(d);
+                  d.state = 'guessing';
+                }
+                else if (i === guess.length - 1) {
+                  // XXX: MAKE GUESS
+                }
+                else {
+                  guess.forEach((d, j) => {
+                    if (j > i) d.state = null;
+                  });
+                  guess = guess.slice(0, i + 1);
+                }
+              }
+              drawGrid();
+          });
 
-    g.append('text')
-      .attr('dy', '.1em')
+          g.append('circle');
+
+          g.append('text')            
+            .attr('dy', '.1em');
+
+          return g;
+        }
+      )
+      .attr('transform', d => `translate(${ xScale(d.j) },${ yScale(d.i) })`);
+
+    nodes.select('circle')
+      .attr('r', radius)
+      .style('visibility', d => guess.includes(d) ? null : 'hidden')
+      .style('fill', d => guess.includes(d) ? guessColor : d.word.spangram ? spangramColor : strandColor);
+
+    nodes.select('text')
       .text(d => d.value.toUpperCase());
+
+    // Links
+    const line = d3.line()
+      .x(d => xScale(d.j))
+      .y(d => yScale(d.i));
+
+    const links = d3.select('#word-svg').select('.links').selectAll('.link')
+      .data(words)
+      .join(
+        enter => {
+          const g = enter.append('g')
+            .attr('class', 'link');
+
+          g.append('path');
+
+          return g;
+        }  
+      )
+      .style('stroke-width', radius)
+      .style('stroke', d => d.spangram ? spangramColor : strandColor)
+      .style('visibility', d => d.found ? null : 'hidden');
+
+    links.select('path')
+      .attr('d', d => line(d.letters));
+
+    // Guess links
+    d3.select('#word-svg').select('.guess-links').select('.link')
+      .style('stroke-width', radius)
+      .style('stroke', guessColor)
+      .attr('d', line(guess));
   };
 
   d3.select('#theme').select('.card-header')
@@ -252,11 +329,11 @@
   instructions.show();
 
   // Get data
-  const [words, letters, numColumns, numRows] = await d3.json('grid.json').then(grid => {
+  const [words, letters, numColumns, numRows] = await d3.json('grid.json').then(data => {
     const words = [];
     const letters = [];
 
-    grid.forEach((row, i) => {
+    data.grid.forEach((row, i) => {
       row.split(' ').forEach((s, j) => {
         // Get character and word info from string
         const [char, info] = s.split('-');
@@ -267,7 +344,9 @@
         if (!word) {
           word = { 
             id: id,
-            letters: []
+            letters: [],
+            found: false,
+            spangram: id === data.spangram
           };
 
           words.push(word);
@@ -279,8 +358,7 @@
           word: word,
           pos: pos,
           i: i,
-          j: j,
-          state: null
+          j: j
         };
 
         letters.push(letter);        
@@ -295,6 +373,8 @@
 
     return [words, letters, numColumns, numRows];
   });
+
+  console.log(letters, words);
 
   // Grid
   d3.select('#word-grid')
