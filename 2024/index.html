@@ -88,6 +88,53 @@
       background-color: #000;
     }
 
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0);
+      visibility: hidden;
+    }
+
+    #overlay.show {
+      background-color: rgba(0, 0, 0, 0.8);
+      visibility: visible;
+    }
+
+    #overlay .container {
+      height: 100%;
+    }
+
+    #picture {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      height: 100%;
+    }
+
+    #picture img {
+      border-radius: 10px;  
+      max-width: 100%; 
+      max-height: calc(100% - 190px);
+      object-fit: contain;
+      display: none;
+    }
+
+    #picture video {
+      display: none;
+    }
+
+    #picture img.show {
+      display: block;
+    }
+
+    #picture video.show {
+      display: block;
+    }
+
   </style>
 </head>
 
@@ -128,7 +175,7 @@
           Today's theme
         </div>
         <div class='card-body fw-bolder fs-4 text-center'>
-          Our year...
+          Family fun...
         </div>
       </div>
     </div>
@@ -147,6 +194,25 @@
   </div>
   <div id='toolbar' class='button-toolbar mt-4'>    
     <div id='hint-button' class='button'>Hint</div>
+    <div class='fs-4'>
+      <span id='num-found' class='fw-bold'></span> of <span id='num-total' class='fw-bold'></span> theme words found.
+    </div>
+  </div>
+</div>
+
+<div id='overlay'>
+  <div class='container px-2'>
+    <div id='picture' class='mt-4'>
+      <div id='picture-solved-list'></div>
+      <img />
+      <video controls preload autoplay>
+        <source type='video/mp4' />
+      </video>
+      <div id='image-buttons' class='button-toolbar'>
+        <div id='next-button' class='button'>Next</div>
+        <div id='close-button' class='button'>Close</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -205,10 +271,111 @@
   const strandColor = '#679576';    // green
   const spangramColor = '#d78685';  // red
 
-  const colorScale = d3.scaleOrdinal()
-    .domain(['guessing', 'found', 'spangram'])
-    .range([guessColor, strandColor, spangramColor])
-    .unknown('#f00');
+  const showImages = word => {
+    let imageIndex = 0;
+
+    const image = word.images[imageIndex];
+
+    if (image.includes('.mp4')) {
+      d3.select('#picture img')
+        .classed('show', false);
+
+      d3.select('#picture video')
+        .classed('show', true)
+        .attr('src', `images/${ image }`)
+        .on('oncanplay', function() {
+          d3.select('#overlay')
+            .classed('show', true);
+        });
+    }
+    else {
+      d3.select('#picture video')
+        .classed('show', false);
+
+      d3.select('#picture img')
+        .classed('show', true)
+        .attr('src', `images/${ image }`)
+        .on('load', function() {
+          d3.select('#overlay')
+            .classed('show', true);
+        });
+    }
+
+    d3.select('#next-button')
+      .on('mousedown', function () {
+        d3.select(this)
+          .classed('down', true);
+
+        const video = d3.select('#picture video').node();
+        video.pause();
+        video.currentTime = 0;
+
+        imageIndex = (imageIndex + 1) % (word.images.length);
+
+        const image = word.images[imageIndex];
+        
+        if (image.includes('.mp4')) {
+          d3.select('#picture img')
+            .classed('show', false);
+        
+          d3.select('#picture video')
+            .classed('show', true)
+            .attr('src', `images/${ image }`)
+            .classed('show', true)
+            .on('oncanplay', function() {
+              d3.select('#overlay')
+                .classed('show', true);
+            });
+        }
+        else {
+          d3.select('#picture video')
+            .classed('show', false);
+        
+          d3.select('#picture img')
+            .classed('show', true)
+            .attr('src', `images/${ image }`)
+            .on('load', function() {
+              d3.select('#overlay')
+                .classed('show', true);
+            });
+        }
+      })
+      .on('mouseup', function () {
+        d3.select(this)
+          .classed('down', false);
+      });
+
+    d3.select('#close-button')
+      .on('mousedown', function () {
+        d3.select(this)
+          .classed('down', true);
+
+        d3.select('#overlay')
+          .classed('show', false);
+
+        d3.select('.submit')
+          .classed('active', false);
+
+        const video = d3.select('#picture video').node();
+        video.pause();
+        video.currentTime = 0;
+
+        selected = [];
+        words = getWords(groups);
+
+        drawSolved(d3.select('#solved-list'), solved);
+        drawGrid(words);
+
+        if (solved.length === 4) {
+          d3.select('#card-overlay')
+            .classed('show', true);
+        }
+      })
+      .on('mouseup', function () {
+        d3.select(this)
+          .classed('down', false);
+      });        
+    };
 
   const drawGrid = () => {
     // Reserve space using css grid
@@ -246,63 +413,69 @@
           const g = enter.append('g')
             .attr('class', 'node')              
             .on('click', (evt, d) => {
-              if (guess.length === 0) {
-                guess.push(d);
-                d.state = 'guessing';
+              // Check if already found 
+              if (d.word.found && guess.length === 0) {
+                showImages(d.word);
               }
               else {
-                const i = guess.indexOf(d);
-
-                if (i === -1) {
-                  // Check neighbor                  
-                  const last = guess[guess.length - 1];
-
-                  if (Math.abs(last.i - d.i) <= 1 && Math.abs(last.j - d.j) <= 1) {
-                    // Add to guess
-                    guess.push(d);
-                  }
-                  else {
-                    // Reset guess
-                    guess = [];
-                  }
-                }
-                else if (i === guess.length - 1) {
-                  // Make guess
-                  let found = false;
-
-                  for (const word of words) {
-                    if (word.letters.length !== guess.length) continue;
-
-                    let correct = true;
-                    for (let i = 0; i < guess.length; i++) {
-                      if (guess[i] !== word.letters[i]) {
-                        correct = false;
-                        break;
-                      }
-                    }
-
-                    if (correct) {
-                      word.found = true;    
-                      found = true;            
-                      break;
-                    }
-                  }                  
-                  
-                  guess = [];
-
-                  if (found) {
-                    // XXX: HANDLE FOUND
-                  } 
-                  else {
-                    // XXX: HANDLE NOT FOUND
-                  }
+                // Logic for guessing 
+                if (guess.length === 0) {
+                  guess.push(d);
                 }
                 else {
-                  // Go back to this index in guess
-                  guess.forEach((d, j) => {
-                    if (j > i) d.state = null;
-                  });
-                  guess = guess.slice(0, i + 1);
+                  const i = guess.indexOf(d);
+
+                  if (i === -1) {
+                    // Check neighbor                  
+                    const last = guess[guess.length - 1];
+
+                    if (Math.abs(last.i - d.i) <= 1 && Math.abs(last.j - d.j) <= 1) {
+                      // Add to guess
+                      guess.push(d);
+                    }
+                    else {
+                      // Reset guess
+                      guess = [];
+                    }
+                  }
+                  else if (i === guess.length - 1) {
+                    // Make guess
+                    let found = null;
+
+                    for (const word of words) {
+                      if (word.letters.length !== guess.length) continue;
+
+                      let correct = true;
+                      for (let i = 0; i < guess.length; i++) {
+                        if (guess[i] !== word.letters[i]) {
+                          correct = false;
+                          break;
+                        }
+                      }
+
+                      if (correct) {
+                        word.found = true;    
+                        found = word;            
+                        break;
+                      }
+                    }                  
+                    
+                    guess = [];
+
+                    if (found) {
+                      showImages(found);
+                    } 
+                    else {
+                      // XXX: HANDLE NOT FOUND
+                    }
+                  }
+                  else {
+                    // Go back to this index in guess
+                    guess.forEach((d, j) => {
+                      if (j > i) d.state = null;
+                    });
+                    guess = guess.slice(0, i + 1);
+                  }
                 }
               }
               drawGrid();
@@ -336,7 +509,16 @@
       .join(
         enter => {
           const g = enter.append('g')
-            .attr('class', 'link');
+            .attr('class', 'link')
+            .on('click', (evt, d) => {
+              console.log(d)
+              if (d.found && guess.length === 0) {
+                showImages(d);
+              }
+              else {
+
+              }
+            });
 
           g.append('path');
 
@@ -345,7 +527,8 @@
       )
       .style('stroke-width', radius / 2)
       .style('stroke', d => d.spangram ? spangramColor : strandColor)
-      .style('visibility', d => d.found ? null : 'hidden');
+      .style('visibility', d => d.found ? null : 'hidden')
+      .style('cursor', 'pointer');
 
     links.select('path')
       .attr('d', d => line(d.letters));
@@ -355,6 +538,13 @@
       .style('stroke-width', radius / 2)
       .style('stroke', guessColor)
       .attr('d', line(guess));
+
+    // Update found info
+    d3.select('#num-found')
+      .text(words.filter(word => word.found).length);
+
+    d3.select('#num-total')
+      .text(words.length);
   };
 
   d3.select('#theme').select('.card-header')
@@ -383,7 +573,8 @@
             id: id,
             letters: [],
             found: false,
-            spangram: id === data.spangram
+            spangram: id === data.spangram,
+            images: data.images[id]
           };
 
           words.push(word);

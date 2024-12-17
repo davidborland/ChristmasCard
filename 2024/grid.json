@@ -6,6 +6,38 @@
     "p-d1 o-d2 o-d3 p-d4",
     "s-e1 h-e2 o-e3 e-e4"
   ],
-  "spangram": "d"
+  "spangram": "d",
+  "images": {
+    "a": [
+      "angus_01.jpg",
+      "angus_02.jpg",
+      "angus_03.jpg",
+      "tkd_video_01.mp4"
+    ],
+    "b": [
+      "angus_01.jpg",
+      "angus_02.jpg",
+      "angus_03.jpg",
+      "tkd_video_01.mp4"
+    ],
+    "c": [
+      "angus_01.jpg",
+      "angus_02.jpg",
+      "angus_03.jpg",
+      "tkd_video_01.mp4"
+    ],
+    "d": [
+      "angus_01.jpg",
+      "angus_02.jpg",
+      "angus_03.jpg",
+      "tkd_video_01.mp4"
+    ], 
+    "e": [
+      "angus_01.jpg",
+      "angus_02.jpg",
+      "angus_03.jpg",
+      "tkd_video_01.mp4"
+    ]
+  }
 }
 
