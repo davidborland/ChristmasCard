@@ -23,29 +23,29 @@
       position: relative;
     }
 
+    #word-grid {
+      display: grid;
+      opacity: 0;
+    }
+
     #word-svg {  
       position: absolute;
       top: 0;
-      z-index: -100;
-    }
-
-    #word-grid {
-      display: grid;
-      grid-gap: 8px;
-      background-color: transparent;
-      opacity: 0.5;
     }
 
     #word-grid .grid-cell {
-      text-transform: uppercase;
-      border-radius: 6px;
-      background-color: #fff;
       min-height: 70px;
-      display: grid;
-      align-items: center;
-      justify-items: center;
+    }
+
+    #word-svg .letter-group {
       cursor: pointer;
-      transition: all 0.1s linear;
+    }
+
+    #word-svg .letter-group text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-weight: bold;
+      font-size: large;
     }
 
     .button-toolbar {
@@ -117,17 +117,23 @@
     </div>
   </div>
   <hr />
-  <div id='theme' class="card">
-    <div class="card-header text-center text-uppercase fw-bold">
-      Today's theme
+  <div class='row'>
+    <div class='col-md-6'>
+      <div id='theme' class="card">
+        <div class='card-header text-center text-uppercase fw-bold'>
+          Today's theme
+        </div>
+        <div class='card-body fw-bolder fs-4'>
+          Our year...
+        </div>
+      </div>
     </div>
-    <div class="card-body fw-bolder fs-4">
-      Our year...
+    <div class='col-md-6'>
+      <div id='grid-wrapper'>  
+        <div id='word-grid'></div>
+        <svg id='word-svg'></svg>  
+      </div>
     </div>
-  </div>
-  <div id='grid-wrapper'>  
-    <svg id='word-svg'></svg>  
-    <div id='word-grid'></div>
   </div>
   <div id='toolbar' class='button-toolbar mt-4'>    
     <div id='hint-button' class='button'>Hint</div>
@@ -183,46 +189,58 @@
 <script type='module'>
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
+  const guessColor = '#bcc6cc';     // bluegrey
   const strandColor = '#679576';    // green
   const spangramColor = '#d78685';  // red
-  const guessColor = '#bcc6cc';     // bluegrey
+
+  const colorScale = d3.scaleOrdinal()
+    .domain(['guessing', 'found', 'spangram'])
+    .range([guessColor, strandColor, spangramColor])
+    .unknown('#fff');
 
   const drawGrid = words => {
+    // Reserve space using css grid
     d3.select('#word-grid').selectAll('.grid-cell')
       .data(letters)
       .join('div')
       .attr('class', 'grid-cell')
       .text(d => d.value)
 
+    // Get size
     const width = parseInt(d3.select('#word-grid').style('width'), 10)
     const height = parseInt(d3.select('#word-grid').style('height'), 10)
 
-    console.log(width, height);
-
+    // Draw using svg
     const xScale = d3.scalePoint()
       .domain(d3.range(numColumns))
       .range([0, width])
       .padding(0.5)
 
     const yScale = d3.scalePoint()
-      .domain(d3.range(numColumns))
+      .domain(d3.range(numRows))
       .range([0, height])
       .padding(0.5)
 
     const g = d3.select('#word-svg')
       .attr('width', width)
       .attr('height', height)
-      .selectAll('g')
+      .selectAll('.letter-group')
       .data(letters)
       .join('g')
-      .attr('transform', d => `translate(${ xScale(d.i) },${ yScale(d.j) })`);
+      .attr('class', 'letter-group')
+      .attr('transform', d => `translate(${ xScale(d.j) },${ yScale(d.i) })`)
+      .on('click', (evt, d) => {
+        d.state = 'guessing';
+        drawGrid();
+      });
 
     g.append('circle')
       .attr('r', 20)
-      .style('fill', 'red');
+      .style('fill', d => colorScale(d.state));
 
     g.append('text')
-      .text(d => d.value)
+      .attr('dy', '.1em')
+      .text(d => d.value.toUpperCase());
   };
 
   d3.select('#theme').select('.card-header')
@@ -234,7 +252,7 @@
   instructions.show();
 
   // Get data
-  const [words, letters, numColumns] = await d3.json('grid.json').then(grid => {
+  const [words, letters, numColumns, numRows] = await d3.json('grid.json').then(grid => {
     const words = [];
     const letters = [];
 
@@ -255,14 +273,14 @@
           words.push(word);
         }
 
-
         // Add the letter
         const letter = {
           value: char,
           word: word,
           pos: pos,
           i: i,
-          j: j
+          j: j,
+          state: null
         };
 
         letters.push(letter);        
@@ -273,18 +291,12 @@
     words.forEach(word => word.letters.sort((a, b) => d3.ascending(a.pos, b.pos)));
 
     const numColumns = d3.max(letters, letter => letter.j) + 1;
+    const numRows = d3.max(letters, letter => letter.i) + 1;
 
-    return [words, letters, numColumns];
+    return [words, letters, numColumns, numRows];
   });
 
-  console.log(words);
-  console.log(letters);
-  console.log(numColumns);
-
   // Grid
-
-  // XXX: Not sure how well a css grid will work with links. Might be better to use d3 ordinal scales?
-
   d3.select('#word-grid')
     .style('grid-template-columns', `repeat(${ numColumns }, 1fr`);
 
