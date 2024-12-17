@@ -254,14 +254,51 @@
                 const i = guess.indexOf(d);
 
                 if (i === -1) {
-                  // XXX: NEED TO CHECK INDECES
-                  guess.push(d);
-                  d.state = 'guessing';
+                  // Check neighbor                  
+                  const last = guess[guess.length - 1];
+
+                  if (Math.abs(last.i - d.i) <= 1 && Math.abs(last.j - d.j) <= 1) {
+                    // Add to guess
+                    guess.push(d);
+                  }
+                  else {
+                    // Reset guess
+                    guess = [];
+                  }
                 }
                 else if (i === guess.length - 1) {
-                  // XXX: MAKE GUESS
+                  // Make guess
+                  let found = false;
+
+                  for (const word of words) {
+                    if (word.letters.length !== guess.length) continue;
+
+                    let correct = true;
+                    for (let i = 0; i < guess.length; i++) {
+                      if (guess[i] !== word.letters[i]) {
+                        correct = false;
+                        break;
+                      }
+                    }
+
+                    if (correct) {
+                      word.found = true;    
+                      found = true;            
+                      break;
+                    }
+                  }                  
+                  
+                  guess = [];
+
+                  if (found) {
+                    // XXX: HANDLE FOUND
+                  } 
+                  else {
+                    // XXX: HANDLE NOT FOUND
+                  }
                 }
                 else {
+                  // Go back to this index in guess
                   guess.forEach((d, j) => {
                     if (j > i) d.state = null;
                   });
@@ -283,7 +320,7 @@
 
     nodes.select('circle')
       .attr('r', radius)
-      .style('visibility', d => guess.includes(d) ? null : 'hidden')
+      .style('visibility', d => guess.includes(d) || d.word.found ? null : 'hidden')
       .style('fill', d => guess.includes(d) ? guessColor : d.word.spangram ? spangramColor : strandColor);
 
     nodes.select('text')
@@ -306,7 +343,7 @@
           return g;
         }  
       )
-      .style('stroke-width', radius)
+      .style('stroke-width', radius / 2)
       .style('stroke', d => d.spangram ? spangramColor : strandColor)
       .style('visibility', d => d.found ? null : 'hidden');
 
@@ -315,7 +352,7 @@
 
     // Guess links
     d3.select('#word-svg').select('.guess-links').select('.link')
-      .style('stroke-width', radius)
+      .style('stroke-width', radius / 2)
       .style('stroke', guessColor)
       .attr('d', line(guess));
   };
@@ -380,7 +417,7 @@
   d3.select('#word-grid')
     .style('grid-template-columns', `repeat(${ numColumns }, 1fr`);
 
-  drawGrid(words);
+  drawGrid();
 
   // Buttons
   d3.select('#info-button')
@@ -399,6 +436,9 @@
       d3.select(this)
         .classed('down', false);
     });
+
+  // Add an event listener that run the function when dimension change
+  window.addEventListener('resize', drawGrid);
 
 </script>
 
