@@ -21,6 +21,7 @@
 
     #current-word {
       font-family: Garamond;
+      min-height: 1.5em;
     }
 
     #picture-word {
@@ -69,14 +70,9 @@
       background-color: #e2e2e2;
     }
 
-    .button.submit {
-      color: #7f7f7f;
-      border-color: #7f7f7f;
-    }
-
-    .button.submit.active {
-      color: #fff;
-      background-color: #000;
+    .button.disabled {
+      border: #666 solid 1px;
+      color: #666;
     }
 
     #overlay {
@@ -176,7 +172,7 @@
       </div>
     </div>
     <div class='col-md-6 text-center'>
-      <div id='current-word' class='text-center text-uppercase fw-bold fs-4 my-2'></div>
+      <div id='current-word' class='text-center fw-bold fs-4 mt-2'></div>
       <svg id='word-svg' font-family='Garamond'>
         <g class='links'></g>
         <g class='guess-links'>
@@ -249,7 +245,24 @@
         </p>
       </div> 
     </div> 
-  </div> 
+  </div>
+</div>
+  
+<div id='hint-instructions' class='modal' tabindex='-1'>
+  <div class='modal-dialog modal-dialog-centered'> 
+    <div class='modal-content'> 
+      <div class='modal-header'> 
+        <h5 class='modal-title'> 
+          Need a Hint?
+        </h5> 
+      </div> 
+      <div class='modal-body'> 
+        <p> 
+          Finding non-theme words earns you hints that will help you find the theme words.
+        </p>
+      </div> 
+    </div> 
+  </div>
 </div> 
 
 <script src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo' crossorigin='anonymous'></script>
@@ -260,6 +273,8 @@
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
   let guess = [];
+  let numHintWords = 0;
+  let maxHintWords = 3;
 
   //const guessColor = '#bcc6cc';     // bluegrey
   const guessColor = '#e0be52';     // gold
@@ -366,6 +381,21 @@
       });        
     };
 
+  
+  const hintInstructions = new bootstrap.Modal(document.getElementById('hint-instructions'));
+  d3.select('#hint-instructions')
+    .on('mousedown', () => hintInstructions.hide());
+
+  const updateHintButton = n => {
+    const percent = (Math.min(n, maxHintWords) / maxHintWords * 100).toFixed(2) + '%';
+
+    d3.select('#hint-button')
+      .style('background-image', `linear-gradient(to right, ${ guessColor } ${ percent }, white ${ percent } 100%)`)
+      .classed('disabled', n < maxHintWords);    
+  };
+
+  updateHintButton(numHintWords);
+
   const drawGrid = () => {
     // Get size
     const spacing = 60;
@@ -391,6 +421,10 @@
       .range([0, height])
       .padding(0.5)
 
+    const setCurrentWord = s => d3.select("#current-word").text(s);
+    const wordToString = word => word.map(d => d.value).join('');
+    const setCurrentGuess = () => setCurrentWord(wordToString(guess).toUpperCase());
+
     // Nodes
     const nodes = d3.select('#word-svg')
       .attr('width', width)
@@ -409,7 +443,10 @@
               else {
                 // Logic for guessing 
                 if (guess.length === 0) {
+                  // Empty guess, so add this letter
                   guess.push(d);
+                  
+                  setCurrentGuess();
                 }
                 else {
                   const i = guess.indexOf(d);
@@ -426,9 +463,11 @@
                       // Reset guess
                       guess = [];
                     }
+                    
+                    setCurrentGuess();
                   }
                   else if (i === guess.length - 1) {
-                    // Make guess
+                    // Clicked the last letter, make guess
                     let found = null;
 
                     for (const word of words) {
@@ -447,16 +486,31 @@
                         found = word;            
                         break;
                       }
-                    }                  
-                    
-                    guess = [];
+                    }          
 
                     if (found) {
+                      setCurrentGuess();
                       showImages(found);
                     } 
                     else {
-                      // XXX: HANDLE NOT FOUND
-                    }
+                      // Check length
+                      if (guess.length <= 3) {
+                        setCurrentWord('Too short');
+                      }
+                      else {
+                        console.log(wordToString(guess))
+
+                        if (dictionary[wordToString(guess)] === 1) {
+                          numHintWords++;
+                          updateHintButton(numHintWords);
+                        }
+                        else {
+                          setCurrentWord('Not in word list');
+                        }
+                      }
+                    }                           
+                    
+                    guess = [];
                   }
                   else {
                     // Go back to this index in guess
@@ -464,6 +518,8 @@
                       if (j > i) d.state = null;
                     });
                     guess = guess.slice(0, i + 1);
+                
+                    setCurrentGuess();
                   }
                 }
               }
@@ -504,9 +560,6 @@
               if (d.found && guess.length === 0) {
                 showImages(d);
               }
-              else {
-
-              }
             });
 
           g.append('path');
@@ -534,11 +587,6 @@
 
     d3.select('#num-total')
       .text(words.length);
-
-    // Update current word
-    d3.select('#current-word')
-      .style('visibility', guess.length > 0 ? null : 'hidden')
-      .text(guess.length > 0 ? guess.map(letter => letter.value).join('') : 'nothing');
   };
 
   d3.select('#theme').select('.card-header')
@@ -598,6 +646,15 @@
 
   console.log(letters, words);
 
+  // Get dictionary words
+  const dictionary = await d3.text('words_alpha.txt').then(data => {
+    const words = data.split("\n").filter(word => word.length > 3);
+    return words.reduce((words, word) => {
+      words[word] = 1;
+      return words;
+    }, {});
+  });
+
   // Grid
   d3.select('#word-grid')
     .style('grid-template-columns', `repeat(${ numColumns }, 1fr`);
@@ -614,8 +671,13 @@
     .on('mousedown', function () {
       d3.select(this)
         .classed('down', true);
+       
+        if (numHintWords > maxHintWords) {
 
-      // Show hint
+        }
+        else {
+          hintInstructions.show();
+        }
     })
     .on('mouseup', function () {
       d3.select(this)
