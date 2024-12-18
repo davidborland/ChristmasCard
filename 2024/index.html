@@ -219,7 +219,7 @@
           <strong>Find theme words related to our past year.</strong>
           <ul>
             <li>Theme words stay highlighted in blue when found.</li>
-            <li>Drag or tap letters to create words. If tapping, double tap the last letter to submit.</li>
+            <li>Click or tap letters to create words. Select the last letter again to submit.</li>
             <li>Theme words fill the board entirely. No theme words overlap.</li>
           </ul>          
         </p> 
@@ -273,8 +273,10 @@
   import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
   let guess = [];
-  let numHintWords = 0;
-  let maxHintWords = 3;
+  let hintWord = null;
+  let numHintGuesses = 0;
+  let maxHintGuesses = 3;
+  const alreadyGuessed = {};
 
   //const guessColor = '#bcc6cc';     // bluegrey
   const guessColor = '#e0be52';     // gold
@@ -373,7 +375,7 @@
         video.pause();
         video.currentTime = 0;
 
-        drawGrid(words);
+        drawGrid();
       })
       .on('mouseup', function () {
         d3.select(this)
@@ -387,14 +389,14 @@
     .on('mousedown', () => hintInstructions.hide());
 
   const updateHintButton = n => {
-    const percent = (Math.min(n, maxHintWords) / maxHintWords * 100).toFixed(2) + '%';
+    const percent = (Math.min(n, maxHintGuesses) / maxHintGuesses * 100).toFixed(2) + '%';
 
     d3.select('#hint-button')
       .style('background-image', `linear-gradient(to right, ${ guessColor } ${ percent }, white ${ percent } 100%)`)
-      .classed('disabled', n < maxHintWords);    
+      .classed('disabled', n < maxHintGuesses);    
   };
 
-  updateHintButton(numHintWords);
+  updateHintButton(numHintGuesses);
 
   const drawGrid = () => {
     // Get size
@@ -489,8 +491,11 @@
                     }          
 
                     if (found) {
+                      // Success
                       setCurrentGuess();
                       showImages(found);
+                      hintWord = null;
+                      numHintGuesses = 0;
                     } 
                     else {
                       // Check length
@@ -498,11 +503,15 @@
                         setCurrentWord('Too short');
                       }
                       else {
-                        console.log(wordToString(guess))
+                        const guessString = wordToString(guess);
 
-                        if (dictionary[wordToString(guess)] === 1) {
-                          numHintWords++;
-                          updateHintButton(numHintWords);
+                        if (alreadyGuessed[guessString] === 1) {
+                          setCurrentWord('Already found');
+                        }
+                        else if (dictionary[guessString] === 1) {
+                          alreadyGuessed[guessString] = 1;
+                          numHintGuesses++;
+                          updateHintButton(numHintGuesses);
                         }
                         else {
                           setCurrentWord('Not in word list');
@@ -526,7 +535,9 @@
               drawGrid();
           });
 
-          g.append('circle');
+          g.append('circle')
+            .style('stroke-dasharray', '6 3')
+            .style('stroke-width', 3);
 
           g.append('text')            
             .attr('dy', '.1em');
@@ -538,8 +549,8 @@
 
     nodes.select('circle')
       .attr('r', radius)
-      .style('visibility', d => guess.includes(d) || d.word.found ? null : 'hidden')
-      .style('fill', d => guess.includes(d) ? guessColor : wordColor(d.word));
+      .style('fill', d => guess.includes(d) ? guessColor : d.word.found ? wordColor(d.word) : 'none')
+      .style('stroke', d => !guess.includes(d) && d.word === hintWord ? strandColor : 'none');
 
     nodes.select('text')
       .text(d => d.value.toUpperCase());
@@ -672,8 +683,13 @@
       d3.select(this)
         .classed('down', true);
        
-        if (numHintWords > maxHintWords) {
-
+        if (numHintGuesses >= maxHintGuesses) {
+          const options = words.filter(word => !word.found && !word.spangram);
+          hintWord = options[Math.floor(Math.random() * options.length)];
+          numHintGuesses = 0;
+          
+          drawGrid();
+          updateHintButton(numHintGuesses);
         }
         else {
           hintInstructions.show();
