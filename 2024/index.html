@@ -127,6 +127,38 @@
       display: block;
     }
 
+    #card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0);  
+      visibility: hidden;    
+    }
+
+    #card-overlay.show {
+      background-color: rgba(0, 0, 0, 0.9);
+      visibility: visible;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #card-overlay img {  
+      max-width: 100%; 
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    #again-button {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translate(-50%, 0);
+    }
+
   </style>
 </head>
 
@@ -206,6 +238,12 @@
   </div>
 </div>
 
+<div id='card-overlay'>
+  <img src='images/family_01.jpg' />
+  <div id='again-button' class='button'>
+    Congratulations!&nbsp;Try&nbsp;Again?</div>
+</div>
+
 <div id='instructions' class='modal' tabindex='-1'> 
   <div class='modal-dialog'> 
     <div class='modal-content'> 
@@ -218,25 +256,32 @@
         <p> 
           <strong>Find theme words related to our past year.</strong>
           <ul>
-            <li>Theme words stay highlighted in blue when found.</li>
+            <li>Theme words stay <span class='strand-color'>highlighted</span> when found.</li>
             <li>Click or tap letters to create words. Select the last letter again to submit.</li>
             <li>Theme words fill the board entirely. No theme words overlap.</li>
+            <li>Solving theme words will display a special suprise! Click on solved theme words to see it again.</li>
           </ul>          
         </p> 
         <p> 
           <strong>Find the "spangram."</strong>
           <ul>
             <li>The spangram describes the puzzle's theme and touches two opposite sides of the board. It may be two words.</li>
-            <li>The spangram highlights in yellow when found.</li>
-            <li>An example spangram with corresponding theme words: LIME, FRUIT, BANANA, APPLE, etc.</li>
+            <li>The spangram also <span class='spangram-color'>highlights</span> when found.</li>
+            <li>
+              An example spangram with corresponding theme words: 
+              <span class='strand-color'>LIME</span>, 
+              <span class='spangram-color'>FRUIT</span>, 
+              <span class='strand-color'>BANANA</span>, 
+              <span class='strand-color'>APPLE</span>, etc.
+            </li>
           </ul>          
         </p> 
         <p> 
           <strong>Need a hint?</strong>
           <ul>
             <li>Find non-theme words to get hints.</li>
-            <li>For every 3 non-theme words you find, you earn a hint.</li>
-            <li>Hints show the letters of a theme word. If there is already an active hint on the board, a hint will show that word’s letter order.</li>
+            <li>For every <span class='max-hint-guesses'></span> non-theme words you find, you earn a hint.</li>
+            <li>Hints show the letters of a theme word, but not the order.</li>
           </ul>          
         </p> 
         <hr />
@@ -276,7 +321,7 @@
   let hintWord = null;
   let numHintGuesses = 0;
   let maxHintGuesses = 3;
-  const alreadyGuessed = {};
+  let alreadyGuessed = {};
 
   //const guessColor = '#bcc6cc';     // bluegrey
   const guessColor = '#e0be52';     // gold
@@ -284,6 +329,10 @@
   const spangramColor = '#d78685';  // red
 
   const wordColor = word => word.spangram ? spangramColor : strandColor;
+
+  const setCurrentWord = s => d3.select("#current-word").text(s);
+   const wordToString = word => word.map(d => d.value).join('');
+  const setCurrentGuess = () => setCurrentWord(wordToString(guess).toUpperCase());
 
   const showImages = word => {
     let imageIndex = 0;
@@ -375,7 +424,15 @@
         video.pause();
         video.currentTime = 0;
 
-        drawGrid();
+        drawGrid();        
+
+        // Check if found all
+        const foundTotal = words.reduce((total, word) => total + (word.found ? 1 : 0), 0);
+
+        if (foundTotal === words.length) {
+          d3.select('#card-overlay')
+            .classed('show', true);
+        }
       })
       .on('mouseup', function () {
         d3.select(this)
@@ -405,10 +462,7 @@
     const height = numRows * spacing;
 
     d3.select('#theme')
-      .style('width', `${ width }px`)
-
-    //const width = parseInt(d3.select('#word-grid').style('width'), 10)
-    //const height = parseInt(d3.select('#word-grid').style('height'), 10)
+      .style('width', `${ width }px`);
 
     const radius = 20;
 
@@ -422,10 +476,6 @@
       .domain(d3.range(numRows))
       .range([0, height])
       .padding(0.5)
-
-    const setCurrentWord = s => d3.select("#current-word").text(s);
-    const wordToString = word => word.map(d => d.value).join('');
-    const setCurrentGuess = () => setCurrentWord(wordToString(guess).toUpperCase());
 
     // Nodes
     const nodes = d3.select('#word-svg')
@@ -672,10 +722,47 @@
 
   drawGrid();
 
+  // Instructions
+  d3.selectAll('.strand-color')
+    .style('color', strandColor)
+    .style('font-weight', 'bold');
+
+  d3.selectAll('.spangram-color')
+    .style('color', spangramColor)
+    .style('font-weight', 'bold');
+
+  d3.selectAll('.max-hint-guesses')
+    .text(maxHintGuesses);
+
   // Buttons
   d3.select('#info-button')
     .on('mousedown', function () {
       instructions.show();
+    });
+
+  d3.select('#again-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      d3.select('#card-overlay')
+        .classed('show', false);
+
+      // Reset
+      guess = [];
+      hintWord = null;
+      numHintGuesses = 0;
+      maxHintGuesses = 3;
+      alreadyGuessed = {};
+      words.forEach(word => word.found = false);
+      setCurrentWord();
+      updateHintButton(numHintGuesses);
+
+      drawGrid();
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
     });
 
   d3.select('#hint-button')
