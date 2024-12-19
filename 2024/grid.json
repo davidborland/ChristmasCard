@@ -10,50 +10,71 @@
     "l-f5 a-f4 c-f3 k-h4 o-g5 l-g6"
   ],
   "spangram": "d",
-  "images": {
-    "a": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
-    "b": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
-    "c": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
+  "words": {
+    "a": { 
+      "info": "David and Tabitha saw Tool and Elder in Charlotte, and David saw Mastodon in Raleigh",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    },
+    "b": { 
+      "info": "We went to Universal Studios Florida over Thanksgiving break to celebrate birthdays",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    },
+    "c": { 
+      "info": "Baking cookies and hanging with cousin Cypress",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    },
     "d": [], 
-    "e": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
-    "f": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
-    "g": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
-    "h": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ]
+    "e": { 
+      "info": "Ewen and Fiona earned their bodan belts (one away from black) in Taekwondo, and Tabitha earned her red belt",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    },
+    "f": { 
+      "info": "We did some fun activities in the area, including Carowinds, The White Water Center, and a trip to the mountains",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    },
+    "g": { 
+      "info": "Ewen and Fiona participated in some fun school activities, including Girl Scouts, a talent show, and Mathapalooza",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    },
+    "h": { 
+      "info": "Both kids played soccer with the Charlotte Independence in the Spring and Fall seasons (David got to coach Fiona's team in the Spring)",
+      "images": [
+        "angus_01.jpg",
+        "angus_02.jpg",
+        "angus_03.jpg",
+        "tkd_video_01.mp4"
+      ]
+    }
   }
 }
 

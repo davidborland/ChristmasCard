@@ -97,7 +97,7 @@
       height: 100%;
     }
 
-    #picture-word {
+    #picture-text {
       border-radius: .5em;
       background-color: #fff;
     }
@@ -220,7 +220,10 @@
 <div id='overlay'>
   <div class='container px-2'>
     <div id='picture' class='mt-4'>
-      <div id='picture-word' class='text-center text-uppercase fw-bold fs-3'></div>
+      <div id='picture-text' class='text-center p-2'>
+        <div id='picture-word' class='fw-bold fs-3'></div>
+        <small id='picture-info' class='text-muted'></small>
+      </div>
       <img />
       <video controls preload autoplay>
         <source type='video/mp4' />
@@ -323,11 +326,11 @@
   const strandColor = '#679576';    // green
   const spangramColor = '#d78685';  // red
 
-  const wordColor = word => word.spangram ? spangramColor : strandColor;
+  const wordColor = word => word.isSpangram ? spangramColor : strandColor;
 
   const setCurrentWord = s => d3.select("#current-word").text(s);
    const wordToString = word => word.map(d => d.value).join('');
-  const setCurrentGuess = () => setCurrentWord(wordToString(guess).toUpperCase());
+  const setCurrentGuess = () => setCurrentWord(wordToString(guess));
 
   const showImages = word => {
     let imageIndex = 0;
@@ -337,6 +340,9 @@
     d3.select('#picture-word')
       .style('color', wordColor(word))
       .text(word.letters.map(letter => letter.value).join(''));
+
+    d3.select('#picture-info')
+      .text(word.info);
 
     if (image.includes('.mp4')) {
       d3.select('#picture img')
@@ -538,7 +544,7 @@
                     if (found) {
                       // Success
                       setCurrentGuess();
-                      if (!found.spangram) showImages(found);
+                      if (!found.isSpangram) showImages(found);
                       hintWord = null;
                     } 
                     else {
@@ -597,7 +603,7 @@
       .style('stroke', d => !guess.includes(d) && d.word === hintWord ? strandColor : 'none');
 
     nodes.select('text')
-      .text(d => d.value.toUpperCase());
+      .text(d => d.value);
 
     // Links
     const line = d3.line()
@@ -670,8 +676,9 @@
             id: id,
             letters: [],
             found: false,
-            spangram: id === data.spangram,
-            images: data.images[id]
+            isSpangram: id === data.spangram,
+            images: data.words[id].images,
+            info: data.words[id].info
           };
 
           words.push(word);
@@ -679,7 +686,7 @@
 
         // Add the letter
         const letter = {
-          value: char,
+          value: char.toUpperCase(),
           word: word,
           pos: pos,
           i: i,
@@ -705,7 +712,7 @@
   const dictionary = await d3.text('words_alpha.txt').then(data => {
     const words = data.split("\n").filter(word => word.length > 3);
     return words.reduce((words, word) => {
-      words[word] = 1;
+      words[word.toUpperCase()] = 1;
       return words;
     }, {});
   });
@@ -765,7 +772,7 @@
         .classed('down', true);
        
         if (numHintGuesses >= maxHintGuesses) {
-          const options = words.filter(word => !word.found && !word.spangram);
+          const options = words.filter(word => !word.found && !word.isSpangram);
           hintWord = options[Math.floor(Math.random() * options.length)];
           numHintGuesses -= 3;
           
