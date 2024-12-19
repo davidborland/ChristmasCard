@@ -36,7 +36,7 @@
       text-anchor: middle;
       dominant-baseline: middle;
       font-weight: bold;
-      font-size: large;
+      font-size: x-large;
     }
 
     .button-toolbar {
@@ -545,7 +545,7 @@
                       // Success
                       setCurrentGuess();
                       if (!found.isSpangram) showImages(found);
-                      hintWord = null;
+                      if (found === hintWord) hintWord = null;
                     } 
                     else {
                       // Check length
