@@ -13,6 +13,18 @@
       overflow: hidden;
     }
 
+    body::after {
+      content: "";
+      background: url('images/lights_02.png');
+      opacity: 0.1;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      position: absolute;
+      z-index: -1;   
+    }
+
     #subheader {
       display: flex; 
       justify-content: space-between;
@@ -616,7 +628,6 @@
           const g = enter.append('g')
             .attr('class', 'link')
             .on('click', (evt, d) => {
-              console.log(d)
               if (d.found && guess.length === 0) {
                 showImages(d);
               }
@@ -704,8 +715,6 @@
 
     return [words, letters, numColumns, numRows];
   });
-
-  console.log(letters, words);
 
   // Get dictionary words
   const dictionary = await d3.text('words_alpha.txt').then(data => {
