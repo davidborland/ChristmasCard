@@ -1,15 +1,15 @@
 {
   "grid": [
-    "t-a1 a-a2 e-b1 w-b2 f-c1 i-c2",
-    "a-e1 b-a3 d-d1 a-d2 e-b3 o-c3",
-    "n-e2 g-e3 i-a4 v-d3 n-b4 n-c4",
-    "u-e4 h-a6 t-a5 i-d4 d-d5 a-c5",
-    "s-e5 a-a7 c-f1 h-f2 r-h2 g-i1",
-    "h-g1 o-g2 r-f3 t-h1 e-h3 i-i2",
-    "l-g3 l-g4 i-f4 a-f8 e-h4 f-i3",
-    "y-g5 s-f5 t-f6 m-f7 s-f9 t-i4"
+    "k-a4 c-a3 o-a2 y-c6 l-c5 i-c4",
+    "u-b1 i-b3 r-a1 e-b4 m-c3 a-c2",    
+    "o-d1 n-b2 v-b3 r-b5 s-b6 f-c1",
+    "l-e7 u-d2 r-d3 y-d4 e-d5 a-b7",
+    "a-e6 i-e5 t-e4 k-h1 a-d6 l-b8",
+    "a-e2 r-e3 i-h2 h-g3 c-g2 r-d7",
+    "m-e1 l-f1 o-f2 c-h3 o-g4 s-g1",
+    "l-f5 a-f4 c-f3 k-h4 o-g5 l-g6"
   ],
-  "spangram": "f",
+  "spangram": "d",
   "images": {
     "a": [
       "angus_01.jpg",
@@ -29,12 +29,7 @@
       "angus_03.jpg",
       "tkd_video_01.mp4"
     ],
-    "d": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ], 
+    "d": [], 
     "e": [
       "angus_01.jpg",
       "angus_02.jpg",
@@ -54,12 +49,6 @@
       "tkd_video_01.mp4"
     ],
     "h": [
-      "angus_01.jpg",
-      "angus_02.jpg",
-      "angus_03.jpg",
-      "tkd_video_01.mp4"
-    ],
-    "i": [
       "angus_01.jpg",
       "angus_02.jpg",
       "angus_03.jpg",

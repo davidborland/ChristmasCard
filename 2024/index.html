@@ -20,12 +20,7 @@
     }
 
     #current-word {
-      font-family: Garamond;
       min-height: 1.5em;
-    }
-
-    #picture-word {
-      font-family: Garamond;
     }
 
     #word-svg .node {
@@ -205,7 +200,7 @@
     </div>
     <div class='col-md-6 text-center'>
       <div id='current-word' class='text-center fw-bold fs-4 mt-2'></div>
-      <svg id='word-svg' font-family='Garamond'>
+      <svg id='word-svg'>
         <g class='links'></g>
         <g class='guess-links'>
           <path class='link'></path>
@@ -543,7 +538,7 @@
                     if (found) {
                       // Success
                       setCurrentGuess();
-                      showImages(found);
+                      if (!found.spangram) showImages(found);
                       hintWord = null;
                       numHintGuesses = 0;
                     } 
