@@ -554,9 +554,21 @@
 
                     if (found) {
                       // Success
-                      setCurrentGuess();
-                      if (!found.isSpangram) showImages(found);
-                      if (found === hintWord) hintWord = null;
+                      setCurrentGuess();       
+
+                      if (found === hintWord) {
+                        hintWord = null;
+                      }               
+
+                      const foundTotal = words.reduce((total, word) => total + (word.found ? 1 : 0), 0);
+
+                      if (!found.isSpangram) {
+                        showImages(found);
+                      }
+                      else if (foundTotal === words.length) {
+                        d3.select('#card-overlay')
+                          .classed('show', true);
+                      }
                     } 
                     else {
                       // Check length
