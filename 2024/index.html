@@ -540,7 +540,6 @@
                       setCurrentGuess();
                       if (!found.spangram) showImages(found);
                       hintWord = null;
-                      numHintGuesses = 0;
                     } 
                     else {
                       // Check length
@@ -768,7 +767,7 @@
         if (numHintGuesses >= maxHintGuesses) {
           const options = words.filter(word => !word.found && !word.spangram);
           hintWord = options[Math.floor(Math.random() * options.length)];
-          numHintGuesses = 0;
+          numHintGuesses -= 3;
           
           drawGrid();
           updateHintButton(numHintGuesses);
