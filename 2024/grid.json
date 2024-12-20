@@ -1,18 +1,18 @@
 {
   "grid": [
-    "k-a4 c-a3 o-a2 y-c6 l-c5 i-c4",
-    "u-b1 i-b3 r-a1 e-b4 m-c3 a-c2",    
-    "o-d1 n-b2 v-b3 r-b5 s-b6 f-c1",
-    "l-e7 u-d2 r-d3 y-d4 e-d5 a-b7",
-    "a-e6 i-e5 t-e4 k-h1 a-d6 l-b8",
-    "a-e2 r-e3 i-h2 h-g3 c-g2 r-d7",
-    "m-e1 l-f1 o-f2 c-h3 o-g4 s-g1",
-    "l-f5 a-f4 c-f3 k-h4 o-g5 l-g6"
+    "v-a4 s-b1 c-b2 h-b3 o-b4 o-b5",
+    "e-a5 i-a3 n-a2 u-a1 l-b6 i-c4",
+    "r-a6 s-a7 a-a8 a-c2 m-c3 l-c5",
+    "o-d1 u-d2 r-d3 l-a9 f-c1 y-c6",
+    "m-e1 a-e2 y-d4 e-d5 a-d6 r-d7",
+    "i-e5 t-e4 r-e3 l-g5 o-g2 l-g1",
+    "a-e6 c-f3 k-f4 c-g3 a-g4 k-h1",
+    "l-e7 o-f2 r-f1 k-h4 c-h3 i-h2"
   ],
   "spangram": "d",
   "words": {
     "a": { 
-      "info": "David and Tabitha saw Tool and Elder in Charlotte, and David saw Mastodon in Raleigh",
+      "info": "We went to Universal Studios Florida over Thanksgiving break to celebrate birthdays",
       "images": [
         "angus_01.jpg",
         "angus_02.jpg",
@@ -21,7 +21,7 @@
       ]
     },
     "b": { 
-      "info": "We went to Universal Studios Florida over Thanksgiving break to celebrate birthdays",
+      "info": "Ewen and Fiona participated in some fun school activities, including Girl Scouts, a talent show, and Mathapalooza",
       "images": [
         "angus_01.jpg",
         "angus_02.jpg",
@@ -49,7 +49,7 @@
       ]
     },
     "f": { 
-      "info": "We did some fun activities in the area, including Carowinds, the White Water Center, and a trip to the mountains",
+      "info": "David and Tabitha saw Tool and Elder in Charlotte, and David saw Mastodon in Raleigh",
       "images": [
         "angus_01.jpg",
         "angus_02.jpg",
@@ -58,7 +58,7 @@
       ]
     },
     "g": { 
-      "info": "Ewen and Fiona participated in some fun school activities, including Girl Scouts, a talent show, and Mathapalooza",
+      "info": "We did some fun activities in the area, including Carowinds, the White Water Center, and a trip to the mountains",
       "images": [
         "angus_01.jpg",
         "angus_02.jpg",

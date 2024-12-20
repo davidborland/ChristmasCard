@@ -562,16 +562,21 @@
                     for (const word of words) {
                       if (word.letters.length !== guess.length) continue;
 
-                      let correct = true;
+                      let correct = true;                      
                       for (let i = 0; i < guess.length; i++) {
-                        if (guess[i] !== word.letters[i]) {
+                        const g = guess[i];
+                        const w = word.letters[i];
+
+                        if (!(g.word === w.word && g.value === w.value)) {
                           correct = false;
                           break;
                         }
                       }
 
                       if (correct) {
-                        word.found = true;    
+                        word.found = true;
+                        // Match the guess in case of different order
+                        word.letters = guess.slice();
                         found = word;            
                         break;
                       }
