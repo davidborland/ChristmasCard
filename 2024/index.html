@@ -81,6 +81,10 @@
       color: #666;
     }
 
+    #give-up-button {
+      width: 100%;
+    }
+
     #overlay {
       position: absolute;
       top: 0;
@@ -201,10 +205,10 @@
   <div class='row'>
     <div class='col-md-6 align-self-center'>
       <div id='theme' class="card mx-auto text-center">
-        <div class='card-header text-uppercase fw-bold'>
+        <div class='card-header text-uppercase fw-bold py-1'>
           Today's theme
         </div>
-        <div class='card-body fw-bolder fs-4'>
+        <div class='card-body fw-bolder fs-5 py-1'>
           Family fun...
         </div>
       </div>
@@ -250,7 +254,8 @@
 <div id='card-overlay'>
   <img src='images/family_01.jpg' />
   <div id='again-button' class='button'>
-    Congratulations!&nbsp;Try&nbsp;Again?</div>
+    Close
+  </div>
 </div>
 
 <div id='instructions' class='modal' tabindex='-1'> 
@@ -313,7 +318,8 @@
       <div class='modal-body'> 
         <p> 
           Finding non-theme words earns you hints that will help you find the theme words.
-        </p>
+        </p>        
+        <div id='give-up-button' class='button'>Give up?</div>
       </div> 
     </div> 
   </div>
@@ -331,6 +337,7 @@
   let numHintGuesses = 0;
   let maxHintGuesses = 3;
   let alreadyGuessed = {};
+  let seenCard = false;
 
   //const guessColor = '#bcc6cc';     // bluegrey
   const guessColor = '#e0be52';     // gold
@@ -340,8 +347,20 @@
   const wordColor = word => word.isSpangram ? spangramColor : strandColor;
 
   const setCurrentWord = s => d3.select("#current-word").text(s);
-   const wordToString = word => word.map(d => d.value).join('');
+  const wordToString = word => word.map(d => d.value).join('');
   const setCurrentGuess = () => setCurrentWord(wordToString(guess));
+
+  const showCard = () => {
+    d3.select('#card-overlay')
+      .classed('show', true);
+
+    seenCard = true;
+  };
+
+  const hideCard = () => {
+    d3.select('#card-overlay')
+      .classed('show', false);
+  };
 
   const showImages = word => {
     let imageIndex = 0;
@@ -441,9 +460,8 @@
         // Check if found all
         const foundTotal = words.reduce((total, word) => total + (word.found ? 1 : 0), 0);
 
-        if (foundTotal === words.length) {
-          d3.select('#card-overlay')
-            .classed('show', true);
+        if (foundTotal === words.length && !seenCard) {
+          showCard();
         }
       })
       .on('mouseup', function () {
@@ -500,9 +518,16 @@
           const g = enter.append('g')
             .attr('class', 'node')              
             .on('click', (evt, d) => {
+              const foundTotal = words.reduce((total, word) => total + (word.found ? 1 : 0), 0);
+
               // Check if already found 
-              if (d.word.found && guess.length === 0) {
-                showImages(d.word);
+              if (d.word.found && guess.length === 0){
+                if (d.word.isSpangram && foundTotal === words.length) {
+                  showCard();
+                } 
+                else if (!d.word.isSpangram) {
+                  showImages(d.word);
+                }
               }
               else {
                 // Logic for guessing 
@@ -558,16 +583,13 @@
 
                       if (found === hintWord) {
                         hintWord = null;
-                      }               
-
-                      const foundTotal = words.reduce((total, word) => total + (word.found ? 1 : 0), 0);
+                      }                                     
 
                       if (!found.isSpangram) {
                         showImages(found);
-                      }
+                      }                     
                       else if (foundTotal === words.length) {
-                        d3.select('#card-overlay')
-                          .classed('show', true);
+                        showCard();
                       }
                     } 
                     else {
@@ -639,9 +661,16 @@
         enter => {
           const g = enter.append('g')
             .attr('class', 'link')
-            .on('click', (evt, d) => {
+            .on('click', (evt, d) => {            
+              const foundTotal = words.reduce((total, word) => total + (word.found ? 1 : 0), 0);
+
               if (d.found && guess.length === 0) {
-                showImages(d);
+                if (d.isSpangram && foundTotal === words.length) {
+                  showCard();
+                }
+                else if (!d.isSpangram) {
+                  showImages(d);
+                }
               }
             });
 
@@ -766,20 +795,21 @@
       d3.select(this)
         .classed('down', true);
 
-      d3.select('#card-overlay')
-        .classed('show', false);
-
+      hideCard();
+/*
       // Reset
       guess = [];
       hintWord = null;
       numHintGuesses = 0;
       maxHintGuesses = 3;
       alreadyGuessed = {};
+      seenCard = false;
       words.forEach(word => word.found = false);
       setCurrentWord();
       updateHintButton(numHintGuesses);
 
       drawGrid();
+*/      
     })
     .on('mouseup', function () {
       d3.select(this)
@@ -807,6 +837,21 @@
       d3.select(this)
         .classed('down', false);
     });
+
+  d3.select('#give-up-button')
+  .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+       
+        words.forEach(word => word.found = true);
+        drawGrid();
+
+        showCard();
+      })
+      .on('mouseup', function () {
+        d3.select(this)
+          .classed('down', false);
+      });
 
   // Add an event listener that run the function when dimension change
   window.addEventListener('resize', drawGrid);
