@@ -137,7 +137,7 @@
       display: block;
     }
 
-    #card-overlay {
+    .card-overlay {
       position: absolute;
       top: 0;
       left: 0;
@@ -147,7 +147,7 @@
       visibility: hidden;    
     }
 
-    #card-overlay.show {
+    .card-overlay.show {
       background-color: rgba(0, 0, 0, 0.9);
       visibility: visible;
       display: flex;
@@ -156,13 +156,13 @@
       justify-content: center;
     }
 
-    #card-overlay img {  
+    .card-overlay img {  
       max-width: 100%; 
       max-height: 100%;
       object-fit: contain;
     }
 
-    #again-button {
+    .close-card-button {
       position: absolute;
       bottom: 40px;
       left: 50%;
@@ -251,9 +251,16 @@
   </div>
 </div>
 
-<div id='card-overlay'>
+<div id='card-overlay' class='card-overlay'>
   <img src='images/family_01.jpg' />
-  <div id='again-button' class='button'>
+  <div id='close-card-button' class='button close-card-button'>
+    Close
+  </div>
+</div>
+
+<div id='tribute-overlay' class='card-overlay'>
+  <img src='images/mum_text.png' />
+  <div id='close-tribute-button' class='button close-card-button'>
     Close
   </div>
 </div>
@@ -795,26 +802,28 @@
       instructions.show();
     });
 
-  d3.select('#again-button')
+  d3.select('#close-card-button')
     .on('mousedown', function () {
       d3.select(this)
         .classed('down', true);
 
-      hideCard();
-/*
-      // Reset
-      guess = [];
-      hintWord = null;
-      numHintGuesses = 0;
-      maxHintGuesses = 3;
-      alreadyGuessed = {};
-      seenCard = false;
-      words.forEach(word => word.found = false);
-      setCurrentWord();
-      updateHintButton(numHintGuesses);
+      hideCard();     
 
-      drawGrid();
-*/      
+      d3.select('#tribute-overlay')
+        .classed('show', true); 
+    })
+    .on('mouseup', function () {
+      d3.select(this)
+        .classed('down', false);
+    });
+
+    d3.select('#close-tribute-button')
+    .on('mousedown', function () {
+      d3.select(this)
+        .classed('down', true);
+
+      d3.select('#tribute-overlay')
+        .classed('show', false);     
     })
     .on('mouseup', function () {
       d3.select(this)
