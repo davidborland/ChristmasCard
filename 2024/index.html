@@ -81,10 +81,6 @@
       color: #666;
     }
 
-    #give-up-button {
-      width: 100%;
-    }
-
     #overlay {
       position: absolute;
       top: 0;
@@ -169,6 +165,10 @@
       transform: translate(-50%, 0);
     }
 
+    #give-up-button {
+      cursor: pointer;
+    }
+
   </style>
 </head>
 
@@ -228,7 +228,12 @@
     <div id='hint-button' class='button'>Hint</div>
     <div class='fs-4'>
       <span id='num-found' class='fw-bold'></span> of <span id='num-total' class='fw-bold'></span> theme words found.
-    </div>
+    </div>    
+  </div>
+  <div class='w-100 mt-2 text-center'>
+    <small id='give-up-text' class='text-muted'>
+      Give up? Click <span id='give-up-button' class='fw-bold'>here</span> to reveal the answers...
+    </small>
   </div>
 </div>
 
@@ -303,6 +308,7 @@
             <li>Find non-theme words to get hints.</li>
             <li>For every <span class='max-hint-guesses'></span> non-theme words you find, you earn a hint.</li>
             <li>Hints show the letters of a theme word, but not the order.</li>
+            <li>Still stumped? If the hints aren't enough, you can give up and then click the solved theme words and spangram.</li>
           </ul>          
         </p> 
         <hr />
@@ -325,8 +331,7 @@
       <div class='modal-body'> 
         <p> 
           Finding non-theme words earns you hints that will help you find the theme words.
-        </p>        
-        <div id='give-up-button' class='button'>Give up?</div>
+        </p>
       </div> 
     </div> 
   </div>
@@ -858,9 +863,9 @@
         .classed('down', true);
        
         words.forEach(word => word.found = true);
-        drawGrid();
+        seenCard = true;
 
-        showCard();
+        drawGrid();
       })
       .on('mouseup', function () {
         d3.select(this)
