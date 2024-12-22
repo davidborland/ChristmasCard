@@ -50,7 +50,7 @@
     "e": { 
       "info": "Taekwondo! Ewen and Fiona earned their bodan belts (one away from black), and Tabitha earned her red belt.",
       "images": [
-        "tkd_01.jpg",
+        "tkd_01_cropped.jpg",
         "tkd_01.mp4",
         "tkd_04.mp4",
         "tkd_03.mp4"
@@ -75,7 +75,6 @@
         "local_06.jpg",
         "local_08.jpg",
         "local_09.jpg",
-        "local_10.jpg",
         "local_11.jpg"
       ]
     },
