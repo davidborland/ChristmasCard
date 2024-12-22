@@ -4,75 +4,88 @@
     "e-a5 i-a3 n-a2 u-a1 l-b6 i-c4",
     "r-a6 s-a7 a-a8 a-c2 m-c3 l-c5",
     "o-d1 u-d2 r-d3 l-a9 f-c1 y-c6",
-    "m-e1 a-e2 y-d4 e-d5 a-d6 r-d7",
-    "i-e5 t-e4 r-e3 l-g5 o-g2 l-g1",
-    "a-e6 c-f3 k-f4 c-g3 a-g4 k-h1",
-    "l-e7 o-f2 r-f1 k-h4 c-h3 i-h2"
+    "r-f1 c-g3 y-d4 e-d5 a-d6 r-d7",
+    "o-f2 a-g4 o-g2 l-g1 k-h4 l-e7",
+    "c-f3 l-g5 k-h1 i-h2 c-h3 a-e6",
+    "k-f4 m-e1 a-e2 r-e3 t-e4 i-e5"
   ],
   "spangram": "d",
   "words": {
     "a": { 
-      "info": "We went to Universal Studios Florida over Thanksgiving break to celebrate birthdays",
+      "info": "We went to Universal Studios Florida over Thanksgiving break to celebrate birthdays!",
       "images": [
-        "angus_01.jpg",
-        "angus_02.jpg",
-        "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "unversal_01.jpg",      
+        "unversal_02.jpg",
+        "unversal_03.jpg",
+        "unversal_05.jpg",
+        "unversal_06.jpg",
+        "unversal_08.jpg",
+        "unversal_09.jpg",
+        "unversal_10.jpg",
+        "unversal_11.jpg"
       ]
     },
     "b": { 
-      "info": "Ewen and Fiona participated in some fun school activities, including Girl Scouts, a talent show, and Mathapalooza",
+      "info": "Ewen and Fiona participated in some fun school activities, including Mathapalooza, Girl Scouts, and Turning Tigers (jumprope)",
       "images": [
-        "angus_01.jpg",
-        "angus_02.jpg",
-        "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "school_01_cropped.jpg",
+        "school_02_cropped.jpg",
+        "school_05_cropped.jpg",
+        "school_08.jpg"
       ]
     },
     "c": { 
-      "info": "Baking cookies and hanging with cousin Cypress",
+      "info": "Baking cookies and hanging with cousin Cypress.",
       "images": [
-        "angus_01.jpg",
         "angus_02.jpg",
+        "family_01.jpg",
         "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "family_05.jpg",
+        "angus_06.jpg",        
+        "family_09.jpg",
+        "angus_08.jpg"
       ]
     },
     "d": [], 
     "e": { 
-      "info": "Ewen and Fiona earned their bodan belts (one away from black) in Taekwondo, and Tabitha earned her red belt",
+      "info": "Taekwondo! Ewen and Fiona earned their bodan belts (one away from black), and Tabitha earned her red belt.",
       "images": [
-        "angus_01.jpg",
-        "angus_02.jpg",
-        "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "tkd_01.jpg",
+        "tkd_01.mp4",
+        "tkd_04.mp4",
+        "tkd_03.mp4"
       ]
     },
     "f": { 
-      "info": "David and Tabitha saw Tool and Elder in Charlotte, and David saw Mastodon in Raleigh",
+      "info": "Rock and Roll! David and Tabitha saw Elder and Tool in Charlotte, David saw Mastodon in Raleigh, and Tabitha and Fiona saw the Indigo Girls in Davidson.",
       "images": [
-        "angus_01.jpg",
-        "angus_02.jpg",
-        "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "rock_01.jpg",
+        "rock_02.jpg",
+        "rock_03.jpg",
+        "rock_05.jpg",
+        "rock_08.jpg"
       ]
     },
     "g": { 
-      "info": "We did some fun activities in the area, including Carowinds, the White Water Center, and a trip to the mountains",
+      "info": "We did some fun activities in the area, including Carowinds, the White Water Center, and a trip to the mountains.",
       "images": [
-        "angus_01.jpg",
-        "angus_02.jpg",
-        "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "local_01.jpg",        
+        "local_03.jpg",
+        "local_04.jpg",
+        "local_06.jpg",
+        "local_08.jpg",
+        "local_09.jpg",
+        "local_10.jpg",
+        "local_11.jpg"
       ]
     },
     "h": { 
-      "info": "Both kids played soccer with the Charlotte Independence in the Spring and Fall seasons (David got to coach Fiona's team in the Spring)",
+      "info": "Both kids played soccer with the Charlotte Independence in the Spring and Fall seasons (David got to coach Fiona's team in the Spring).",
       "images": [
-        "angus_01.jpg",
-        "angus_02.jpg",
-        "angus_03.jpg",
-        "tkd_video_01.mp4"
+        "ewen_soccer_01.jpg",
+        "ewen_soccer_02.jpg",        
+        "fiona_soccer_01.jpg",
+        "fiona_soccer_02.jpg"
       ]
     }
   }
