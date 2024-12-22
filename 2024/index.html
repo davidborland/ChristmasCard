@@ -10,7 +10,7 @@
     body {
       height: 100%;
       user-select: none;
-      overflow: auto;
+      overflow: visible;
     }
 
     body::after {
@@ -115,7 +115,7 @@
     #picture img {
       border-radius: 10px;  
       max-width: 100%; 
-      max-height: calc(100% - 190px);
+      max-height: calc(100% - 220px);
       object-fit: contain;
       display: none;
     }
@@ -496,7 +496,7 @@
 
   const drawGrid = () => {
     // Get size
-    const spacing = 50;
+    const spacing = 60;
     const width = numColumns * spacing;
     const height = numRows * spacing;
 
