@@ -128,8 +128,25 @@ header {
     align-items: center;
 }
 
+#rolls {
+    height: 3rem;
+    width: 100%;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 0px;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 0.5rem 0.5rem;
+}
+
+#rolls > div {
+    width: 10px;
+    height: 0px;
+    background: white;
+}
+
 #progress {
-    width: 50%;
+    width: 100%;
     display: flex;
     flex: 1 1 auto;
     gap: 2px;
@@ -143,7 +160,7 @@ header {
 }
 
 #result {
-    width: 50%;
+    width: 100%;
     font-size: 1.5rem;
     color: rgba(255,255,255,0.9);
     flex: 1 1 auto;

@@ -31,6 +31,11 @@
 
     const seen = images.map(() => false);
 
+    const minRoll = 6;
+    const maxRoll = 60;
+    const rollBuckets = 10;
+    const rolls = [...Array(rollBuckets)].map(() => 0);
+
     that.init = function() {
         elem.container = $t.id('diceRoller');
         elem.result = $t.id('result');
@@ -65,8 +70,12 @@
 
         show_instructions(true);
 
+        elem.rolls = $t.id('rolls');
+        rolls.forEach(() => elem.rolls.appendChild(document.createElement('div')));
+
         elem.progress = $t.id('progress');
         seen.forEach(() => elem.progress.appendChild(document.createElement('div')));
+
         update_progress();
     }
 
@@ -217,17 +226,26 @@
             });
         }
 
-        update_progress(image_index);
+        update_progress(total, image_index);
     }
 
-    function update_progress(index) {
+    function update_progress(total, index) {
+        if (total >= minRoll && total <= maxRoll) {
+            rolls[Math.floor((total - minRoll) / rollBuckets)]++;
+        }
+
         if (index >= 0 && index < seen.length) {
             seen[index] = true;
         }
 
-        const children = elem.progress.children;
-        for (let i = 0; i < children.length; i++) {
-            children[i].style.backgroundColor = seen[i] ? '#fff' : '#666';
+        const rolls_children = elem.rolls.children;
+        for (let i = 0; i < rolls_children.length; i++) {
+            rolls_children[i].style.height = (rolls[i] / Math.max(...rolls)) * 100 + '%';
+        }
+
+        const progress_children = elem.progress.children;
+        for (let i = 0; i < progress_children.length; i++) {
+            progress_children[i].style.backgroundColor = seen[i] ? '#fff' : '#666';
         }
     }
 
