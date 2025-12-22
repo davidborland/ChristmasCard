@@ -7,42 +7,39 @@
     <link rel='stylesheet' href='styles.css' />
     <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN' crossorigin='anonymous'>
 </head>
-<body onload="main.init()">
+<body onload='main.init()'>
 
-    <div id="diceRoller"> <!-- absolutely positionned behind #diceRollerUI -->
+    <div id='diceRoller'> <!-- absolutely positionned behind #diceRollerUI -->
         <!-- dice_box gets created here -->
     </div>
 
     <!-- <header>
         <h1>3D Dice Roller</h1>
-        <button id="helpBtn">?</button>
+        <button id='helpBtn'>?</button>
     </header> -->
 
-    <main id="diceRollerUI">        
-        <div id='center_div' class="center_field"><!-- swipe bound to this -->
-            <div id="instructions" style="display: none">
-                <p>Swipe to roll dice</p>
+    <main id='diceRollerUI'>        
+        <div id='center_div' class='center_field'><!-- swipe bound to this -->
+            <div id='instructions' style='display: none'>
+                <p id='swipe-text'>Swipe to roll dice</p>
             </div>
         </div>
-        <div class="bottom_field">
-            <span id="result"></span>
+        <div class='bottom_field'>
+            <div id='progress'></div>
+            <div id='result'></div>
         </div>  
-        <div id="image-overlay">
-          <div class='container px-2'>
-            <div id='picture' class='mt-4'>
-              <img id="image-display"/>
-              <video controls preload autoplay>
-                <source id="video-display" type='video/mp4' />
-              </video>
-            </div>
-          </div>
-        </div>
     </main>
+    <div id='image-overlay'>
+        <img id='image-display'/>
+        <video id='video-display' preload autoplay>
+          <source type='video/mp4'/>
+        </video>
+    </div>
 
-    <script src="libs/three.min.js"></script>
-    <script src="libs/cannon.min.js"></script>
-    <script src="libs/teal.js"></script>
-    <script src="dice.js"></script>
-    <script src="main.js"></script>
+    <script src='libs/three.min.js'></script>
+    <script src='libs/cannon.min.js'></script>
+    <script src='libs/teal.js'></script>
+    <script src='dice.js'></script>
+    <script src='main.js'></script>
 </body>
 </html>

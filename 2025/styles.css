@@ -15,7 +15,7 @@ body {
     margin: 0;
     overflow-x: hidden;
     background: #202020;
-    background-image: url("assets/background.jpg");
+    background-image: url("assets/grid_background.jpg");
     background-repeat: no-repeat;
     background-position: right bottom;
     background-size: cover;
@@ -105,11 +105,14 @@ header {
 }
 
 #instructions p {
-    color: rgb(255, 255, 255);
+    color: white;
     background: none;
     margin: auto;
     top: 35%;
     padding: 1em;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 3px 3px 6px black;
 }
 
 .bottom_field {
@@ -117,65 +120,72 @@ header {
     bottom: 0;
     text-align: center;
     min-height: 3rem;
+    padding: 0 0.5rem;
     background: rgba(0, 0, 0, 0.4);
     width: inherit;
-    padding: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#progress {
+    width: 50%;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 2px;
+    justify-content: center;
+}
+
+#progress > div {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
 }
 
 #result {
-    position: relative;
-    display: block;
-    min-height: 1.5em;
-    bottom: 5px;
-    word-spacing: 0.5em;
+    width: 50%;
+    font-size: 1.5rem;
     color: rgba(255,255,255,0.9);
-    padding: 0.5em;
-    margin-left: 5px;
-    margin-right: 5px;
+    flex: 1 1 auto;
 }
 
-#overlay {
+#image-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
     visibility: hidden;
-    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
 }
 
-#overlay.show {
-    display: block;
+#image-overlay.show {
+    visibility: visible;
 }
 
-.overlay-container {
-    height: 100%;
-}
-
-#picture {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    height: 100%;
-}
-
-#picture img {
+#image-overlay > * {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
     border-radius: 10px;  
-    max-width: 100%; 
-    max-height: calc(100% - 220px);
     object-fit: contain;
-    display: none;
+    visibility: hidden;
 }
 
-#picture video {
-    display: none;
+#image-display.show {
+    visibility: visible;
 }
 
-#picture img.show {
-    display: block;
+#video-display.show {
+    visibility: visible;
 }
 
-#picture video.show {
-    display: block;
+#swipe-text {
+    color: black;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px white;
 }

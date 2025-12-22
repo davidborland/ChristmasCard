@@ -17,16 +17,11 @@
     var box = null;
 
     const images = [
-        "universal_01.jpg",      
-        "universal_02.jpg",
-        "universal_03.jpg",
-        "universal_05.jpg",
-        "universal_06.jpg",
-        "universal_08.jpg",
-        "universal_09.jpg",
-        "universal_10.jpg",
-        "universal_11.jpg"
+        "universal_01.jpg",  
+        "tkd_01.mp4",
     ];
+
+    const seen = images.map(() => false);
 
     that.init = function() {
         elem.container = $t.id('diceRoller');
@@ -38,8 +33,22 @@
         elem.image_overlay = $t.id('image-overlay');
         elem.image = $t.id('image-display');
         elem.video = $t.id('video-display');
+        elem.video_source = elem.video.querySelector('source');
         elem.image_overlay.addEventListener('click', () => {
+            elem.image_overlay.classList.remove('show');
             elem.image.classList.remove('show');
+            elem.video.classList.remove('show');
+            elem.video.pause();
+
+            if(seen.every(value => value === true)) {
+                //console.log('All images have been seen');
+                elem.result.innerHTML = "Congratulations! You've seen all the images. <br> Refresh to start over.";
+
+                seen.forEach((v, i) => seen[i] = false);
+                update_progress();
+            }
+
+            show_instructions(true);
         });
 
         box = new DICE.dice_box(elem.container);
@@ -47,6 +56,10 @@
         box.setDice("1d4+1d6+1d8+1d10+1d12+1d20");
 
         show_instructions(true);
+
+        elem.progress = $t.id('progress');
+        seen.forEach(() => elem.progress.appendChild(document.createElement('div')));
+        update_progress();
     }
 
     that.setInput = function() {
@@ -166,17 +179,48 @@
         //console.log('after_roll notation: ' + JSON.stringify(notation));
         if(notation.result[0] < 0) {
             elem.result.innerHTML = "Oops, your dice fell off the table. <br> Refresh and roll again."
-        } else {
-            elem.result.innerHTML = notation.resultString;
-
+            return;
         }
+
+        let resultString = notation.result.join(' + ');
+        resultString += ' = ' + notation.resultTotal;
+
+        elem.result.innerHTML = resultString;
 
         const total = notation.resultTotal;
         const image_index = total % images.length;
         const image_name = images[image_index];
-        elem.image.src = "images/" + image_name;
-        elem.image.classList.add('show');
 
+        if (image_name.endsWith('.mp4')) {
+            elem.video.src = "images/" + image_name;
+            elem.video.classList.add('show');
+
+            elem.video.addEventListener('canplay', function() {
+                elem.image_overlay.classList.add('show');
+                elem.video.play();
+            });
+        } 
+        else {
+            elem.image.src = "images/" + image_name;
+            elem.image.classList.add('show');
+
+            elem.image.addEventListener('load', function() {
+                elem.image_overlay.classList.add('show');
+            });
+        }
+
+        update_progress(image_index);
+    }
+
+    function update_progress(index) {
+        if (index >= 0 && index < seen.length) {
+            seen[index] = true;
+        }
+
+        const children = elem.progress.children;
+        for (let i = 0; i < children.length; i++) {
+            children[i].style.backgroundColor = seen[i] ? '#fff' : '#666';
+        }
     }
 
     return that;
