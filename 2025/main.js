@@ -17,7 +17,15 @@
     var box = null;
 
     const images = [
-        "universal_01.jpg",  
+        "universal_01.jpg",      
+        "universal_02.jpg",
+        "universal_03.jpg",
+        "universal_05.jpg",
+        "universal_06.jpg",
+        "universal_08.jpg",
+        "universal_09.jpg",
+        "universal_10.jpg",
+        "universal_11.jpg",
         "tkd_01.mp4",
     ];
 
@@ -193,19 +201,19 @@
 
         if (image_name.endsWith('.mp4')) {
             elem.video.src = "images/" + image_name;
-            elem.video.classList.add('show');
 
             elem.video.addEventListener('canplay', function() {
                 elem.image_overlay.classList.add('show');
+                elem.video.classList.add('show');
                 elem.video.play();
             });
         } 
         else {
             elem.image.src = "images/" + image_name;
-            elem.image.classList.add('show');
 
             elem.image.addEventListener('load', function() {
                 elem.image_overlay.classList.add('show');
+                elem.image.classList.add('show');
             });
         }
 
