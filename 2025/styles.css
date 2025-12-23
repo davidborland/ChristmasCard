@@ -119,51 +119,50 @@ header {
     position: absolute;
     bottom: 0;
     text-align: center;
-    min-height: 3rem;
     padding: 0 0.5rem;
     background: rgba(0, 0, 0, 0.4);
     width: inherit;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-#rolls {
-    height: 3rem;
+#result {
+    min-height: 3rem;
     width: 100%;
-    display: flex;
-    flex: 1 1 auto;
-    gap: 0px;
-    justify-content: center;
-    align-items: flex-end;
-    padding: 0.5rem 0.5rem;
-}
-
-#rolls > div {
-    width: 10px;
-    height: 0px;
-    background: white;
+    font-size: 1.5rem;
+    color: white;
+    flex: 0 1 auto;
+    text-shadow: 3px 3px 6px black;
 }
 
 #progress {
-    width: 100%;
+    position: relative;
+    min-height: 3rem;
+    width: 90%;
     display: flex;
-    flex: 1 1 auto;
-    gap: 2px;
-    justify-content: center;
-}
-
-#progress > div {
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
-}
-
-#result {
-    width: 100%;
+    flex: 0 1 auto;
+    justify-content: space-between;
     font-size: 1.5rem;
     color: rgba(255,255,255,0.9);
-    flex: 1 1 auto;
+    gap: 0;
+}
+
+#progress-bar {
+    position: absolute;
+    width: 100%;
+    margin-top: 0.5rem;
+    height: 1rem;
+    background-color: rgba(255,255,255,0.3);
+}
+
+#xp-label {
+    position: absolute;
+    top: -.1rem;
+    text-align: left;
+    font-size: 1.5rem;    
+    text-shadow: 3px 3px 6px black;
 }
 
 #image-overlay {
@@ -198,11 +197,4 @@ header {
 
 #video-display.show {
     visibility: visible;
-}
-
-#swipe-text {
-    color: black;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px white;
 }

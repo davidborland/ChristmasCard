@@ -29,12 +29,12 @@
         "tkd_01.mp4",
     ];
 
-    const seen = images.map(() => false);
+    let xp = 0;
+    let level_spacing = 60;
+    let level = 0;
+    const levels = images.map((image, i) => (i + 1) * level_spacing);
 
-    const minRoll = 6;
-    const maxRoll = 60;
-    const rollBuckets = 10;
-    const rolls = [...Array(rollBuckets)].map(() => 0);
+    console.log(levels)
 
     that.init = function() {
         elem.container = $t.id('diceRoller');
@@ -53,14 +53,6 @@
             elem.video.classList.remove('show');
             elem.video.pause();
 
-            if(seen.every(value => value === true)) {
-                //console.log('All images have been seen');
-                elem.result.innerHTML = "Congratulations! You've seen all the images. <br> Refresh to start over.";
-
-                seen.forEach((v, i) => seen[i] = false);
-                update_progress();
-            }
-
             show_instructions(true);
         });
 
@@ -70,56 +62,17 @@
 
         show_instructions(true);
 
-        elem.rolls = $t.id('rolls');
-        rolls.forEach(() => elem.rolls.appendChild(document.createElement('div')));
-
         elem.progress = $t.id('progress');
-        seen.forEach(() => elem.progress.appendChild(document.createElement('div')));
-
+        elem.progress_bar = $t.id('progress-bar');
+        elem.xp_label = $t.id('xp-label');
+        for (let i = 0; i <= levels.length; i++) {
+            const div = elem.progress.appendChild(document.createElement('div'));
+            div.style.backgroundColor = i % 2 ? '#098113ff' : '#a30a0aff';
+            div.style.height = '2rem';
+            div.style.width = '5px';
+            div.style.borderRadius = '5px';
+        };
         update_progress();
-    }
-
-    that.setInput = function() {
-        let inputVal = elem.textInput.value;
-        //check for d100 and add tens place die
-        if(inputVal.includes('d100')) {
-            let dIdx = inputVal.indexOf('d100');
-            let numD100 = '';
-            for(let i = dIdx - 1; i >= 0; i--) {
-                let digit = inputVal[i];
-                if(!isNaN(digit)) {
-                    numD100 = digit + numD100;
-                } else {
-                    break;
-                }                
-            }
-            if(numD100 === '') numD100 = '1';
-            //console.log('num d100s: ' + numD100);
-            for(let i = 0; i < numD100; i++) {
-                inputVal += '+d9';
-            }
-        }
-        //check for too many dice
-        let d = DICE.parse_notation(inputVal);
-        let numDice = d.set.length;
-        if(numDice > 20) {
-            elem.diceLimit.style.display = 'block';
-        } else {
-            box.setDice(inputVal);
-            show_numPad(false);
-            show_instructions(true);
-        }
-    }
-
-    that.clearInput = function() {
-        elem.textInput.value = '';
-    }
-
-    //called from numPad onclicks
-    that.input = function(value) {
-        vars.lastVal = value;
-        vars.userTyping = true;
-        elem.textInput.focus();
     }
 
     function _handleInput() {
@@ -200,40 +153,58 @@
         }
 
         let resultString = notation.result.join(' + ');
-        resultString += ' = ' + notation.resultTotal;
+        resultString += ' = ' + notation.resultTotal + ' XP';
 
         elem.result.innerHTML = resultString;
 
         const total = notation.resultTotal;
-        const image_index = total % images.length;
-        const image_name = images[image_index];
+        update_progress(total);
 
-        if (image_name.endsWith('.mp4')) {
-            elem.video.src = "images/" + image_name;
+        if (xp >= levels[level]) {
+            if (level >= levels.length - 1) {
+                // XXX COMPLETED
+                level = 0;
+            }
+            else {
+                const image_name = images[level];
+                
+                if (image_name.endsWith('.mp4')) {
+                    elem.video.src = "images/" + image_name;
 
-            elem.video.addEventListener('canplay', function() {
-                elem.image_overlay.classList.add('show');
-                elem.video.classList.add('show');
-                elem.video.play();
-            });
-        } 
-        else {
-            elem.image.src = "images/" + image_name;
+                    elem.video.addEventListener('canplay', function() {
+                        elem.image_overlay.classList.add('show');
+                        elem.video.classList.add('show');
+                        elem.video.play();
+                    });
+                } 
+                else {
+                    elem.image.src = "images/" + image_name;
 
-            elem.image.addEventListener('load', function() {
-                elem.image_overlay.classList.add('show');
-                elem.image.classList.add('show');
-            });
+                    elem.image.addEventListener('load', function() {
+                        elem.image_overlay.classList.add('show');
+                        elem.image.classList.add('show');
+                    });
+                }
+
+                level++;
+            }
         }
-
-        update_progress(total, image_index);
     }
 
-    function update_progress(total, index) {
-        if (total >= minRoll && total <= maxRoll) {
-            rolls[Math.floor((total - minRoll) / rollBuckets)]++;
+    function update_progress(roll) {
+        if (roll !== undefined) {
+            xp += roll;
         }
 
+        const fraction = xp / levels[levels.length - 1];
+
+        elem.progress_bar.style.width = fraction * 100 + '%';
+
+        elem.xp_label.style.left = 'calc(' + fraction * 100 + '% + .2rem)';
+        elem.xp_label.textContent = 'XP: ' + xp;
+
+        // /elem.progress.textContent = 'XP: ' + xp;
+/*
         if (index >= 0 && index < seen.length) {
             seen[index] = true;
         }
@@ -247,6 +218,7 @@
         for (let i = 0; i < progress_children.length; i++) {
             progress_children[i].style.backgroundColor = seen[i] ? '#fff' : '#666';
         }
+            */
     }
 
     return that;
