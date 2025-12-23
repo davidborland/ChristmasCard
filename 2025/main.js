@@ -17,16 +17,8 @@
     var box = null;
 
     const images = [
-        "universal_01.jpg",      
-        "universal_02.jpg",
-        "universal_03.jpg",
-        "universal_05.jpg",
-        "universal_06.jpg",
-        "universal_08.jpg",
-        "universal_09.jpg",
-        "universal_10.jpg",
-        "universal_11.jpg",
-        "tkd_01.mp4",
+        "universal_01.jpg",  
+        "card_01.jpg",
     ];
 
     let xp = 0;
@@ -56,6 +48,39 @@
             show_instructions(true);
         });
 
+        elem.video.addEventListener('canplay', function() {
+            show_level_up(level);
+
+            elem.image_overlay.classList.add('show');
+            elem.video.classList.add('show');
+            elem.video.play();                    
+
+            if (level >= levels.length - 1) {
+                level = 0;
+                xp = 0;
+                update_progress();
+            }
+            else {
+                level++;
+            }
+        });
+
+        elem.image.addEventListener('load', function() {
+            show_level_up(level);
+
+            elem.image_overlay.classList.add('show');
+            elem.image.classList.add('show');                    
+
+            if (level >= levels.length - 1) {
+                level = 0;
+                xp = 0;
+                update_progress();
+            }
+            else {
+                level++;
+            }
+        });
+
         box = new DICE.dice_box(elem.container);
         box.bind_swipe(elem.center_div, before_roll, after_roll);
         box.setDice("1d4+1d6+1d8+1d10+1d12+1d20");
@@ -73,6 +98,10 @@
             div.style.borderRadius = '5px';
         };
         update_progress();
+
+        elem.level_up = $t.id('level-up');
+        elem.level_up_text = $t.id('level-up-text');
+        elem.which_level = $t.id('which-level');
     }
 
     function _handleInput() {
@@ -161,34 +190,39 @@
         update_progress(total);
 
         if (xp >= levels[level]) {
-            if (level >= levels.length - 1) {
-                // XXX COMPLETED
-                level = 0;
-            }
+            const image_name = images[level];
+            
+            if (image_name.endsWith('.mp4')) {
+                elem.video.src = "images/" + image_name;                
+            } 
             else {
-                const image_name = images[level];
-                
-                if (image_name.endsWith('.mp4')) {
-                    elem.video.src = "images/" + image_name;
-
-                    elem.video.addEventListener('canplay', function() {
-                        elem.image_overlay.classList.add('show');
-                        elem.video.classList.add('show');
-                        elem.video.play();
-                    });
-                } 
-                else {
-                    elem.image.src = "images/" + image_name;
-
-                    elem.image.addEventListener('load', function() {
-                        elem.image_overlay.classList.add('show');
-                        elem.image.classList.add('show');
-                    });
-                }
-
-                level++;
+                elem.image.src = "images/" + image_name;
             }
         }
+        else {
+            show_instructions(true);
+        }
+    }
+
+    function show_level_up(level) {
+        elem.level_up.classList.add('show');
+
+        let timeout = 2000;
+
+        if (level >= levels.length - 1) {
+            elem.level_up_text.textContent = 'Congratulations!';
+            elem.which_level.textContent = 'You have defeated December Dice!';
+
+            timeout = 5000;
+        }
+        else {
+            elem.level_up_text.textContent = 'Level up!';
+            elem.which_level.textContent = 'Level ' + (level + 1);
+        }
+
+        setTimeout(() => {
+            elem.level_up.classList.remove('show');
+        }, timeout);
     }
 
     function update_progress(roll) {
