@@ -17,16 +17,30 @@
     var box = null;
 
     const images = [
-        "universal_01.jpg",  
-        "card_01.jpg",
+        "cool-kids.jpg",
+        //"ewen-sober.mp4",
+        "ewen-soccer.jpg",
+        "ewen-tortoise.jpg",
+        "fiona-tortoise.jpg",
+        "fiona-uke.jpg",
+        "kids-alcatraz.jpg",
+        "kids-chocolate.jpg",
+        "pecktastic.jpg",
+        "redwoods.jpg",
+        "school.jpg",
+        //"tabitha-break.mp4",
+        "tabitha-dave-elder.jpg",
+        "tabitha-france.jpg",
+        "tabitha-gondola.jpg",
+        "tabitha-korea.jpg",
+        "tabitha-sunset.jpg",
+        "zodiac.jpg",
     ];
 
     let xp = 0;
     let level_spacing = 60;
     let level = 0;
     const levels = images.map((image, i) => (i + 1) * level_spacing);
-
-    console.log(levels)
 
     that.init = function() {
         elem.container = $t.id('diceRoller');
@@ -234,7 +248,7 @@
 
         elem.progress_bar.style.width = fraction * 100 + '%';
 
-        elem.xp_label.style.left = 'calc(' + fraction * 100 + '% + .2rem)';
+        //elem.xp_label.style.left = 'calc(' + Math.min(fraction, 0.9) * 100 + '% + .2rem)';
         elem.xp_label.textContent = 'XP: ' + xp;
 
         // /elem.progress.textContent = 'XP: ' + xp;

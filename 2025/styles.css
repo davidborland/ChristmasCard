@@ -159,8 +159,10 @@ header {
 
 #xp-label {
     position: absolute;
-    top: -.1rem;
-    text-align: left;
+    top: .5rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
     font-size: 1.5rem;    
     text-shadow: 3px 3px 6px black;
 }
