@@ -16,26 +16,26 @@
     }
     var box = null;
 
-    const images = [
+    let images = [
         "cool-kids.jpg",
-        //"ewen-sober.mp4",
+        "ewen-sober-trim.mp4",
         "ewen-soccer.jpg",
         "ewen-tortoise.jpg",
+        "fiona-break-trim.mp4",
         "fiona-tortoise.jpg",
         "fiona-uke.jpg",
-        "kids-alcatraz.jpg",
         "kids-chocolate.jpg",
         "pecktastic.jpg",
-        "redwoods.jpg",
         "school.jpg",
-        //"tabitha-break.mp4",
-        "tabitha-dave-elder.jpg",
-        "tabitha-france.jpg",
-        "tabitha-gondola.jpg",
+        "tabitha-break-trim.mp4",
         "tabitha-korea.jpg",
-        "tabitha-sunset.jpg",
         "zodiac.jpg",
     ];
+
+    const card = 'card_01.jpg';
+
+    images = images.sort(() => Math.random() - 0.5);
+    images.push(card);
 
     let xp = 0;
     let level_spacing = 60;
