@@ -59,7 +59,7 @@
             elem.video.classList.remove('show');
             elem.video.pause();
 
-            elem.level_up.remove('show');
+            elem.level_up.classList.remove('show');
 
             show_instructions(true);
         });
