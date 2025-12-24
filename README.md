@@ -8,4 +8,6 @@
 
 [2023](https://davidborland.github.io/ChristmasCard/2023)
 
-[2023](https://davidborland.github.io/ChristmasCard/2024)
+[2024](https://davidborland.github.io/ChristmasCard/2024)
+
+![image](https://github.com/davidborland/ChristmasCard/assets/289957/31bf9b8c-e2ea-49f5-acd8-545bcd880ccf)
