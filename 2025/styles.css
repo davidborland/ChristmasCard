@@ -129,9 +129,9 @@ header {
 }
 
 #result {
-    min-height: 3rem;
+    min-height: 2rem;
     width: 100%;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: white;
     flex: 0 1 auto;
     text-shadow: 3px 3px 6px black;
@@ -144,7 +144,6 @@ header {
     display: flex;
     flex: 0 1 auto;
     justify-content: space-between;
-    font-size: 1.5rem;
     color: rgba(255,255,255,0.9);
     gap: 0;
 }
@@ -163,7 +162,7 @@ header {
     left: 0;
     width: 100%;
     text-align: center;
-    font-size: 1.5rem;    
+    font-size: 1.2rem;    
     text-shadow: 3px 3px 6px black;
 }
 
@@ -214,6 +213,7 @@ header {
     text-shadow: 3px 3px 6px black;
     visibility: hidden;
     z-index: 2000;
+    pointer-events: none;
 }
 
 #level-up.show {
@@ -221,9 +221,9 @@ header {
 }
 
 #level-up-text {
-    font-size: 5rem;
+    font-size: 4rem;
 }
 
 #which-level {
-    font-size: 3rem;
+    font-size: 2rem;
 }
