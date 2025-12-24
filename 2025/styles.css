@@ -227,3 +227,9 @@ header {
 #which-level {
     font-size: 2rem;
 }
+
+#subheader {
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+}

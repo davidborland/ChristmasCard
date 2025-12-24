@@ -81,6 +81,11 @@
             }
         });
 
+        const info = new bootstrap.Modal(document.getElementById('info'));
+        $t.id('info-button').addEventListener('mousedown', () => info.show());
+        $t.id('info').addEventListener('mousedown', () => info.hide());
+        info.show();
+
         elem.image.addEventListener('load', function() {
             show_level_up(level);
 
