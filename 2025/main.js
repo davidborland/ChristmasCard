@@ -232,7 +232,7 @@
 
         if (level >= levels.length - 1) {
             elem.level_up_text.textContent = 'Congratulations!';
-            elem.which_level.textContent = 'You have defeated December Dice!';
+            elem.which_level.textContent = "That's how we rolled in 2025!";
 
             timeout = 5000;
         }
